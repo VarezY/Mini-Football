@@ -16,7 +16,7 @@ namespace MiniFootball.UI
             _bar = GetComponent<Image>();
         }
 
-        private void Start()
+        private void OnEnable()
         {
             timeToFill = InGameManager.instance.matchManager.timeToFillEnergy;
         }

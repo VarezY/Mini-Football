@@ -19,8 +19,12 @@ namespace MiniFootball.UI
 
         private void OnEnable()
         {
-            StartCoroutine(this.WaitAndSubscribe(() => 
-                InGameManager.instance.InGameEvents.OnStartGame += StartMatch));
+            StartCoroutine(this.WaitAndSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnStartGame += StartMatch;
+                InGameManager.instance.InGameEvents.OnNextMatch += NextMatch;
+                
+            }));
         }
 
         private void OnDisable()
@@ -33,6 +37,13 @@ namespace MiniFootball.UI
             timerController.StartTimer();
             playerBarController.StartRecharge();
             enemyBarController.StartRecharge();
+        }
+
+        private void NextMatch()
+        {
+            timerController.RestartTimer();
+            playerBarController.ResetEnergyBars();
+            enemyBarController.ResetEnergyBars();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MiniFootball.Game;
+﻿using MiniFootball.Agent;
+using MiniFootball.Game;
 using MiniFootball.UI;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace MiniFootball
         public InGameEvents InGameEvents;
         public UIManager uiManager { get; private set; }
         public MatchManager matchManager { get; private set; }
+        public AgentManager agentManager { get; private set; }
 
         private void Awake()
         {
@@ -26,12 +28,19 @@ namespace MiniFootball
 
             uiManager = GetComponentInChildren<UIManager>();
             matchManager = GetComponentInChildren<MatchManager>();
+            agentManager = GetComponentInChildren<AgentManager>();
         }
 
         [ContextMenu("Start Game")]
         public void StartGame()
         {
             InGameEvents.StartGame();
+        }
+
+        [ContextMenu("Next Match")]
+        public void NextMatch()
+        {
+            InGameEvents.NextMatch();
         }
     }
 }

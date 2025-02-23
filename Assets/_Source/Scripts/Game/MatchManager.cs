@@ -11,21 +11,24 @@ namespace MiniFootball.Game
         [Header("Debug Info (Read Only)")]
         [SerializeField] private int currentMatch = 1;
         [SerializeField] private GameState currentState = GameState.Starting;
-        [SerializeField] private Side playerStatus = Side.Attacker;
-        [SerializeField] private Side enemyStatus = Side.Defender;
+        public Side playerStatus = Side.Attacker;
+        public Side enemyStatus = Side.Defender;
+        public bool isBallOnPlayer;
 
         [Header("Match Configuration")]
         [SerializeField] private GameObject ball;
         [SerializeField] private int maxMatches = 6;
-        [SerializeField] private int timer = 140;
+        public int timer = 140;
         public int timeToFillEnergy = 2;
         
         [Header("Player Configuration")]
         [SerializeField] private BoxCollider spawnPlayerArea;
+        [SerializeField] private BoxCollider fencePlayer;
         [SerializeField] private GameObject playerPrefab;
 
         [Header("Enemy Configuration")]
         [SerializeField] private BoxCollider spawnEnemyArea;
+        [SerializeField] private BoxCollider fenceEnemy;
         [SerializeField] private GameObject enemyPrefab;
 
         private Camera _camera;
@@ -34,26 +37,26 @@ namespace MiniFootball.Game
 
         private void OnEnable()
         {
-            StartCoroutine(this.WaitAndSubscribe(() => 
-                InGameManager.instance.InGameEvents.OnStartGame += StartMatch));
+            StartCoroutine(this.WaitAndSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnStartGame += StartMatch;
+                InGameManager.instance.InGameEvents.OnNextMatch += NextMatch;
+                InGameManager.instance.InGameEvents.OnBallCatch += controller => isBallOnPlayer = true;
+            }));
         }
 
         private void OnDisable()
         {
-            this.WaitAndUnSubscribe(() => InGameManager.instance.InGameEvents.OnStartGame -= StartMatch);
+            this.WaitAndUnSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnStartGame -= StartMatch;
+                InGameManager.instance.InGameEvents.OnNextMatch -= NextMatch;
+            });
         }
 
         private void Start()
         {
             _camera = Camera.main;
-        }
-
-        private void Update()
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                SpawnAgent();
-            }
         }
         
         public void SpawnBall(BoxCollider spawnArea)
@@ -67,6 +70,19 @@ namespace MiniFootball.Game
         public Vector3 GetBallPosition()
         {
             return ball.transform.position;
+        }
+
+        public Vector3 GetFencePosition(Side side)
+        {
+            switch (side)
+            {
+                case Side.Attacker when playerStatus == Side.Attacker:
+                    return fenceEnemy.transform.position;
+                case Side.Attacker when enemyStatus == Side.Attacker:
+                    return fencePlayer.transform.position;
+                default:
+                    return Vector3.zero;
+            }
         }
 
         [ContextMenu("Start Match")]
@@ -88,19 +104,10 @@ namespace MiniFootball.Game
 
         private void NextMatch()
         {
-            
-        }
-
-        private void SpawnAgent()
-        {
-            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 100, LayerMask.GetMask("Ground")))
-            {
-                _allocPos = hit.point;
-            }
-            _allocPos.y = 0f;
-            Instantiate(playerPrefab, _allocPos, Quaternion.identity);
+            playerStatus = playerStatus == Side.Attacker ? Side.Defender : Side.Attacker;
+            enemyStatus = enemyStatus == Side.Attacker ? Side.Defender : Side.Attacker;
+            currentMatch++;
+            StartMatch();
         }
     }
 }

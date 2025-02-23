@@ -15,6 +15,8 @@ namespace MiniFootball.UI
         private Queue<EnergyBar> _inactiveEnergyBars = new Queue<EnergyBar>(6);
 
         private Coroutine _updateEnergyBars;
+        private Tween _bar;
+        private EnergyBar _currentEnergyBar;
         private bool _finishedUpdateEnergyBars;
         
         private void Awake()
@@ -30,21 +32,41 @@ namespace MiniFootball.UI
         [ContextMenu("Update energy text")]
         public void StartRecharge()
         {
-            _updateEnergyBars = StartCoroutine(RechageEnergyBar());
+            _updateEnergyBars = StartCoroutine(RechargeEnergyBar());
         }
 
-        private IEnumerator RechageEnergyBar()
+        public void ResetEnergyBars()
         {
-            do
+            _bar.Kill();
+            _currentEnergyBar.HideBar();
+            StopCoroutine(_updateEnergyBars);
+            foreach (EnergyBar energyBar in _activeEnergyBars)
             {
-                EnergyBar energyBar = _inactiveEnergyBars.Dequeue();
-                energyBar.gameObject.SetActive(true);
-                Tween bar = energyBar.Recharge();
-                yield return bar.WaitForCompletion();
-                _activeEnergyBars.Enqueue(energyBar);
-                energyText.text = _activeEnergyBars.Count.ToString();
-            } while (_inactiveEnergyBars.Count > 0);
+                energyBar.HideBar();
+                energyBar.gameObject.SetActive(false);
+            }
+            _activeEnergyBars.Clear();
+            _inactiveEnergyBars.Clear();
+            energyText.text = "0";
+            foreach (EnergyBar energyBar in energyBars)
+            {
+                _inactiveEnergyBars.Enqueue(energyBar);
+            }
+            StartRecharge();
+        }
 
+        private IEnumerator RechargeEnergyBar()
+        {
+            while (_inactiveEnergyBars.Count > 0)
+            {   
+                _currentEnergyBar = _inactiveEnergyBars.Dequeue();
+                _currentEnergyBar.gameObject.SetActive(true);
+                _bar = _currentEnergyBar.Recharge();
+                yield return _bar.WaitForCompletion();
+                _activeEnergyBars.Enqueue(_currentEnergyBar);
+                energyText.text = _activeEnergyBars.Count.ToString();
+            }
+            
             _finishedUpdateEnergyBars = true;
         }
         
