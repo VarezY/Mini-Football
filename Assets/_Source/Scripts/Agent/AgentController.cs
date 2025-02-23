@@ -7,15 +7,13 @@ namespace MiniFootball.Agent
 {
     public class AgentController : MonoBehaviour
     {
-        public enum AgentStatus { Active, Inactive }
-        
         private static readonly int Color1 = Shader.PropertyToID("_BaseColor");
 
-        public AgentStatus status = AgentStatus.Active;
         public AgentState state = AgentState.Idle;
         [Header("Agent Configuration")] 
-        public MatchManager.Side side;
+        public MatchSide side;
         public float agentTimeToSpawn = 0.5f;
+        public SphereCollider defenderArea;
         public Animator animator;
         
         [Header("Agent Color")]
@@ -42,6 +40,7 @@ namespace MiniFootball.Agent
         private AgentStateMachine _agentStateMachine;
         private CharacterController _characterController;
         private AgentMovement _agentMovement;
+        private AgentController _target;
         private Vector3 _ballPosition;
         private Vector3 _fencePosition;
         private bool _hasBall = false;
@@ -71,25 +70,24 @@ namespace MiniFootball.Agent
             });
         }
 
-        private void BallCatch(AgentController agentWithBall)
-        {
-            this.state = AgentState.GoToFence;
-            if (agentWithBall == this)
-            {
-                _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedWithBall);
-                ballIndicator.SetActive(true);
-            }
-        }
-
         private IEnumerator Start()
         {
             _gameManager = InGameManager.instance;
             _ballPosition = _gameManager.matchManager.GetBallPosition();
             _fencePosition = _gameManager.matchManager.GetFencePosition(side);
             ChangeColor(inactiveColor);
- 
-            yield return new WaitForSeconds(agentTimeToSpawn);
             _agentStateMachine.Initialize(_agentStateMachine.IdleState);
+
+            yield return new WaitForSeconds(agentTimeToSpawn);
+            switch (side)
+            {
+                case MatchSide.Attacker:
+                    _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
+                    break;
+                case MatchSide.Defender:
+                    _agentStateMachine.TransitionTo(_agentStateMachine.PatrolState);
+                    break;
+            }
         }
 
         private void Update()
@@ -105,6 +103,23 @@ namespace MiniFootball.Agent
         public void MoveAgent(Vector3 position)
         {
             _agentMovement.MoveToPosition(position);
+        }
+
+        public void ChaseAgentWithBall(AgentController target)
+        {
+            _target = target;
+            state = AgentState.ChaseTarget;
+            _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
+        }
+        
+        private void BallCatch(AgentController agentWithBall)
+        {
+            this.state = AgentState.GoToFence;
+            if (agentWithBall != this) return;
+            
+            _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedWithBall);
+            _characterController.radius = 0.25f;
+            ballIndicator.SetActive(true);
         }
     }
 }

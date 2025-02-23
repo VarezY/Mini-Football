@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using MiniFootball.Game;
 using UnityEngine;
 
 namespace MiniFootball.Agent
 {
     public class AgentManager : MonoBehaviour
     {
-        private enum AgentType{ Player, Enemy, }
-        
         [Header("Object Pool")]
         public List<GameObject> pooledObjects;
         public GameObject objectToPool;
@@ -21,6 +20,7 @@ namespace MiniFootball.Agent
         private AgentType _agentType;
         private Camera _camera;
         private Vector3 _spawnPoint;
+        private bool _canSpawn;
 
         private void Awake()
         {
@@ -76,7 +76,6 @@ namespace MiniFootball.Agent
                     {
                         agentController.flagColor = playerColor;
                         agentController.side = _gameManager.matchManager.playerStatus;
-                        agentController.state = _gameManager.matchManager.isBallOnPlayer? AgentState.GoToFence : AgentState.Idle;
                     }
                     break;
                 case AgentType.Enemy:
@@ -88,6 +87,21 @@ namespace MiniFootball.Agent
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(agentType), agentType, null);
+            }
+            
+            switch (agentController.side)
+            {
+                case MatchSide.Attacker:
+                    _canSpawn = _gameManager.uiManager.RemoveCharge(agentType, 2);
+                    break;
+                case MatchSide.Defender:
+                    _canSpawn = _gameManager.uiManager.RemoveCharge(agentType, 3);
+                    break;
+            }
+
+            if (!_canSpawn)
+            {
+                return;
             }
             SpawnAgent(selectedAgent);
         }
@@ -101,7 +115,7 @@ namespace MiniFootball.Agent
                 _spawnPoint = hit.point;
             }
             _spawnPoint.y = 0f;
-            // Instantiate(playerPrefab, _spawnPoint, Quaternion.identity);
+
             // Spawn from object pool
             if (!modifiedAgent) return;
 

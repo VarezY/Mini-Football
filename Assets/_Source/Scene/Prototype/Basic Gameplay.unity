@@ -963,10 +963,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4402d24cc194c67a19ef626e2b4ff1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  status: 0
   state: 0
   side: 0
   agentTimeToSpawn: 0.5
+  defenderArea: {fileID: 0}
   animator: {fileID: 1359372418}
   shirt: {fileID: 1211117427}
   flagColor: {r: 1, g: 0, b: 0, a: 0}
@@ -1603,7 +1603,7 @@ MonoBehaviour:
   pooledObjects: []
   objectToPool: {fileID: 2851339606286696345, guid: 830a6c4a87dfed7469fcb3498be75a58,
     type: 3}
-  amountToPool: 35
+  amountToPool: 58
   playerColor: {r: 0.8235295, g: 0.20784315, b: 0.23529413, a: 1}
   enemyColor: {r: 0.20392159, g: 0.6901961, b: 0.9921569, a: 1}
 --- !u!1 &336470334
@@ -1733,10 +1733,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4402d24cc194c67a19ef626e2b4ff1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  status: 0
   state: 0
   side: 0
   agentTimeToSpawn: 0.5
+  defenderArea: {fileID: 0}
   animator: {fileID: 1350713681}
   shirt: {fileID: 2103589844}
   flagColor: {r: 1, g: 0, b: 0, a: 0}
@@ -4973,7 +4973,7 @@ PrefabInstance:
     - target: {fileID: 7360057365361939043, guid: cfe1af3a965ad8d479d7648614ed73c9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.42
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7360057365361939043, guid: cfe1af3a965ad8d479d7648614ed73c9,
         type: 3}
@@ -4983,7 +4983,7 @@ PrefabInstance:
     - target: {fileID: 7360057365361939043, guid: cfe1af3a965ad8d479d7648614ed73c9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.77
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7360057365361939043, guid: cfe1af3a965ad8d479d7648614ed73c9,
         type: 3}
@@ -7363,10 +7363,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4402d24cc194c67a19ef626e2b4ff1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  status: 0
   state: 4
   side: 0
   agentTimeToSpawn: 0
+  defenderArea: {fileID: 0}
   animator: {fileID: 0}
   shirt: {fileID: 0}
   flagColor: {r: 0, g: 0, b: 0, a: 0}
@@ -10903,7 +10903,7 @@ PrefabInstance:
     - target: {fileID: 2851339606286696345, guid: 830a6c4a87dfed7469fcb3498be75a58,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2851339606805506402, guid: 830a6c4a87dfed7469fcb3498be75a58,
         type: 3}
@@ -10914,6 +10914,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4531541392658707428, guid: 830a6c4a87dfed7469fcb3498be75a58,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4531541393911516527, guid: 830a6c4a87dfed7469fcb3498be75a58,
         type: 3}

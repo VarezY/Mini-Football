@@ -5,14 +5,13 @@ namespace MiniFootball.Game
 {
     public class MatchManager : MonoBehaviour
     {
-        public enum Side { Attacker, Defender }
         public enum GameState { Starting, Playing, Scoring }
         
         [Header("Debug Info (Read Only)")]
         [SerializeField] private int currentMatch = 1;
         [SerializeField] private GameState currentState = GameState.Starting;
-        public Side playerStatus = Side.Attacker;
-        public Side enemyStatus = Side.Defender;
+        public MatchSide playerStatus = MatchSide.Attacker;
+        public MatchSide enemyStatus = MatchSide.Defender;
         public bool isBallOnPlayer;
 
         [Header("Match Configuration")]
@@ -72,13 +71,13 @@ namespace MiniFootball.Game
             return ball.transform.position;
         }
 
-        public Vector3 GetFencePosition(Side side)
+        public Vector3 GetFencePosition(MatchSide side)
         {
             switch (side)
             {
-                case Side.Attacker when playerStatus == Side.Attacker:
+                case MatchSide.Attacker when playerStatus == MatchSide.Attacker:
                     return fenceEnemy.transform.position;
-                case Side.Attacker when enemyStatus == Side.Attacker:
+                case MatchSide.Attacker when enemyStatus == MatchSide.Attacker:
                     return fencePlayer.transform.position;
                 default:
                     return Vector3.zero;
@@ -88,11 +87,11 @@ namespace MiniFootball.Game
         [ContextMenu("Start Match")]
         private void StartMatch()
         {
-            if (playerStatus == Side.Attacker && enemyStatus == Side.Defender)
+            if (playerStatus == MatchSide.Attacker && enemyStatus == MatchSide.Defender)
             {
                 SpawnBall(spawnPlayerArea);
             }
-            else if (enemyStatus == Side.Attacker && playerStatus == Side.Defender)
+            else if (enemyStatus == MatchSide.Attacker && playerStatus == MatchSide.Defender)
             {
                 SpawnBall(spawnEnemyArea);
             }
@@ -104,8 +103,8 @@ namespace MiniFootball.Game
 
         private void NextMatch()
         {
-            playerStatus = playerStatus == Side.Attacker ? Side.Defender : Side.Attacker;
-            enemyStatus = enemyStatus == Side.Attacker ? Side.Defender : Side.Attacker;
+            playerStatus = playerStatus == MatchSide.Attacker ? MatchSide.Defender : MatchSide.Attacker;
+            enemyStatus = enemyStatus == MatchSide.Attacker ? MatchSide.Defender : MatchSide.Attacker;
             currentMatch++;
             StartMatch();
         }

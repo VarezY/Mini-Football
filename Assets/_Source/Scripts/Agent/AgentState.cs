@@ -7,6 +7,7 @@
         SearchingBall,
         GoToFence,
         Passing,
+        ChaseTarget,
         Inactive,
     }
 }

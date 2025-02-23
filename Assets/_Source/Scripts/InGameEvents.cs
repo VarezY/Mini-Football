@@ -23,5 +23,9 @@ namespace MiniFootball
         {
             OnBallCatch?.Invoke(agent);
         }
+
+        public event Action<AgentController> OnTriggerDefender;
+
+        // public event Action OnEndGame;
     }
 }

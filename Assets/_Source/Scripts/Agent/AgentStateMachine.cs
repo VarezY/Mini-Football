@@ -10,6 +10,7 @@ namespace MiniFootball.Agent
         // reference to the state objects
         public IdleState IdleState;
         public RunState RunState;
+        public PatrolState PatrolState;
         /*
         public WalkState walkState;
         public JumpState jumpState;
@@ -24,6 +25,7 @@ namespace MiniFootball.Agent
         {
             this.IdleState = new IdleState(player);
             this.RunState = new RunState(player);
+            this.PatrolState = new PatrolState(player);
             // create an instance for each state and pass in PlayerController
             /*
             this.walkState = new WalkState(player);
@@ -45,6 +47,10 @@ namespace MiniFootball.Agent
         // exit this state and enter another
         public void TransitionTo(IState nextState)
         {
+            if (currentState == nextState)
+            {
+                return;
+            }
             currentState.Exit();
             currentState = nextState;
             nextState.Enter();

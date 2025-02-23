@@ -21,26 +21,26 @@ namespace MiniFootball.Agent
             moveSpeed = speed;
         }
 
-        // Move towards a specific world position
         public void MoveToPosition(Vector3 targetPosition)
         {
-            // Get direction to target
             Vector3 direction = (targetPosition - transform.position);
-            direction.y = 0; // Keep movement on the horizontal plane
+            direction.y = 0; // Lock y axis
 
             if (!(direction.magnitude > stoppingDistance)) return;
             
-            // Normalize for consistent speed
             direction = direction.normalized;
             
-            // Move towards target
             _controller.Move(direction * (moveSpeed * Time.deltaTime));
             
-            // Optional: Rotate towards movement direction
             if (direction != Vector3.zero)
             {
                 transform.rotation = Quaternion.LookRotation(direction);
             }
+        }
+
+        public void MoveTowardsDirection(Vector3 targetPosition)
+        {
+            _controller.Move(targetPosition * (moveSpeed * Time.deltaTime));
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using MiniFootball.Agent;
+using MiniFootball.Game;
 using MiniFootball.UI.Timer;
 using TMPro;
 using UnityEngine;
@@ -44,6 +46,21 @@ namespace MiniFootball.UI
             timerController.RestartTimer();
             playerBarController.ResetEnergyBars();
             enemyBarController.ResetEnergyBars();
+        }
+
+        public bool RemoveCharge(AgentType type, int charge)
+        {
+            switch (type)
+            {
+                case AgentType.Player when charge <= playerBarController.ActiveEnergyBars.Count:
+                    playerBarController.RemoveCharge(charge);
+                    return true;
+                case AgentType.Enemy when charge <= enemyBarController.ActiveEnergyBars.Count:
+                    enemyBarController.RemoveCharge(charge);
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
