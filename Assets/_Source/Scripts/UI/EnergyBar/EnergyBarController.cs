@@ -11,7 +11,7 @@ namespace MiniFootball.UI
     {
         public EnergyBar[] energyBars;
         public TMP_Text energyText;
-        private Queue<EnergyBar> _activeEnergyBars = new Queue<EnergyBar>(6);
+        public Queue<EnergyBar> ActiveEnergyBars = new Queue<EnergyBar>(6);
         private Queue<EnergyBar> _inactiveEnergyBars = new Queue<EnergyBar>(6);
 
         private Coroutine _updateEnergyBars;
@@ -22,7 +22,7 @@ namespace MiniFootball.UI
         private void Awake()
         {
             _inactiveEnergyBars.Clear();
-            _activeEnergyBars.Clear();
+            ActiveEnergyBars.Clear();
             foreach (EnergyBar energyBar in energyBars)
             {
                 _inactiveEnergyBars.Enqueue(energyBar);
@@ -40,12 +40,12 @@ namespace MiniFootball.UI
             _bar.Kill();
             _currentEnergyBar.HideBar();
             StopCoroutine(_updateEnergyBars);
-            foreach (EnergyBar energyBar in _activeEnergyBars)
+            foreach (EnergyBar energyBar in ActiveEnergyBars)
             {
                 energyBar.HideBar();
                 energyBar.gameObject.SetActive(false);
             }
-            _activeEnergyBars.Clear();
+            ActiveEnergyBars.Clear();
             _inactiveEnergyBars.Clear();
             energyText.text = "0";
             foreach (EnergyBar energyBar in energyBars)
@@ -63,27 +63,27 @@ namespace MiniFootball.UI
                 _currentEnergyBar.gameObject.SetActive(true);
                 _bar = _currentEnergyBar.Recharge();
                 yield return _bar.WaitForCompletion();
-                _activeEnergyBars.Enqueue(_currentEnergyBar);
-                energyText.text = _activeEnergyBars.Count.ToString();
+                ActiveEnergyBars.Enqueue(_currentEnergyBar);
+                energyText.text = ActiveEnergyBars.Count.ToString();
             }
             
             _finishedUpdateEnergyBars = true;
         }
         
-        private void RemoveCharge(int chargeNumber)
+        public void RemoveCharge(int chargeNumber)
         {
-            if (_activeEnergyBars.Count < chargeNumber)
+            if (ActiveEnergyBars.Count < chargeNumber)
                 return;
 
             for (int i = 0; i < chargeNumber; i++)
             {
-                EnergyBar x = _activeEnergyBars.Dequeue();
+                EnergyBar x = ActiveEnergyBars.Dequeue();
                 _inactiveEnergyBars.Enqueue(x);
                 x.transform.SetAsLastSibling();
                 x.HideBar();
                 x.gameObject.SetActive(false);
             }
-            energyText.text = _activeEnergyBars.Count.ToString();
+            energyText.text = ActiveEnergyBars.Count.ToString();
 
             if (!_finishedUpdateEnergyBars) 
                 return;
