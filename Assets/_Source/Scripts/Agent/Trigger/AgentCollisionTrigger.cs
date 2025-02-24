@@ -22,29 +22,25 @@ namespace MiniFootball.Agent
             _hasHit = true;
 
             bool hasController = hit.gameObject.TryGetComponent(out AgentController collideAgent);
-           
+            if (!hasController) return;
+
             switch (_agentController.side)
             {
-                case MatchSide.Attacker:
-                    Debug.Log($"{_agentController.name} get caught: PASS");
+                case MatchSide.Attacker when collideAgent.side != MatchSide.Attacker:
                     _agentController.InactiveAgent();
                     break;
-                case MatchSide.Defender:
-                    Debug.Log($"{_agentController.name} Get back to initial position");
+                case MatchSide.Defender when collideAgent.side != MatchSide.Defender:
                     _agentController.ReturnToPatrol();
                     break;
             }
 
-            if (!hasController) return;
-            
+            // DO IT AGAIN TO BE SAFE
             switch (collideAgent.side)
             {
-                case MatchSide.Attacker:
-                    Debug.Log($"{collideAgent.name} get caught: PASS");
+                case MatchSide.Attacker when _agentController.side != MatchSide.Attacker:
                     collideAgent.InactiveAgent();
                     break;
-                case MatchSide.Defender:
-                    Debug.Log($"{collideAgent.name} Get back to initial position");
+                case MatchSide.Defender when _agentController.side != MatchSide.Defender:
                     collideAgent.ReturnToPatrol();
                     break;
             }

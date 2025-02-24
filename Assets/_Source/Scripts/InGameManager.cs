@@ -34,7 +34,6 @@ namespace MiniFootball
 
         private void Start()
         {
-            StartGame();
         }
 
         [ContextMenu("Start Game")]

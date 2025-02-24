@@ -12,6 +12,8 @@ namespace MiniFootball.Agent
         public float returnSpeedDefender = 2f;
         [SerializeField] private float stoppingDistance = 0.1f;
 
+        public Vector3 direction;
+        public Vector3 velocity;
         private CharacterController _controller;
 
         private void Awake()
@@ -26,7 +28,7 @@ namespace MiniFootball.Agent
 
         public void MoveToPosition(Vector3 targetPosition, Action onDestinationReached = null)
         {
-            Vector3 direction = (targetPosition - transform.position);
+            direction = (targetPosition - transform.position);
             direction.y = 0; // Lock y axis
 
             if (!(direction.magnitude > stoppingDistance))
@@ -36,8 +38,8 @@ namespace MiniFootball.Agent
             }
             
             direction = direction.normalized;
-            
-            _controller.Move(direction * (moveSpeed * Time.deltaTime));
+            velocity = direction * (moveSpeed * Time.deltaTime);
+            _controller.Move(velocity);
             
             if (direction != Vector3.zero)
             {
@@ -51,3 +53,4 @@ namespace MiniFootball.Agent
         }
     }
 }
+

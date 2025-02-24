@@ -37,6 +37,5 @@ namespace MiniFootball.Maze
                     throw new ArgumentOutOfRangeException();
             }
         }
-    }    
+    }
 }
-

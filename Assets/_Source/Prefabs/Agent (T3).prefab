@@ -5215,7 +5215,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8323497985506352827
 Transform:
   m_ObjectHideFlags: 0
@@ -5793,6 +5793,7 @@ GameObject:
   - component: {fileID: 2851339606286696344}
   - component: {fileID: 2851339606286696351}
   - component: {fileID: 84245847719934562}
+  - component: {fileID: 4170818683815257171}
   m_Layer: 0
   m_Name: Agent (T3)
   m_TagString: Agent
@@ -5878,10 +5879,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 1.5
   moveSpeedWithBall: 0.75
-  moveSpeedNormal: 0.75
+  moveSpeedNormal: 1.5
   moveSpeedDefender: 1
   returnSpeedDefender: 2
   stoppingDistance: 0.1
+  direction: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &84245847719934562
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5894,6 +5897,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44899340ab2a4c7eafa464d2ce040fa4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4170818683815257171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2851339606286696345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4d326c90744ffca6403ef481989968, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hasBall: 0
+  passRange: 10
+  passSpeed: 1.5
 --- !u!1 &2851339606805506402
 GameObject:
   m_ObjectHideFlags: 0

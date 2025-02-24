@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using DG.Tweening;
 using MiniFootball.Game;
 using UnityEngine;
 
@@ -8,7 +9,6 @@ namespace MiniFootball.Agent
     public class AgentController : MonoBehaviour
     {
         private static readonly int Color1 = Shader.PropertyToID("_BaseColor");
-        private static readonly int HasTarget = Animator.StringToHash("HasTarget");
 
         public AgentState state = AgentState.Idle;
         
@@ -30,10 +30,11 @@ namespace MiniFootball.Agent
         public GameObject ballIndicator;
         public GameObject defenderIndicator;
 
-        #region ExposeToStateMachine
+        #region Exposed Variables
 
         public AgentStateMachine agentStateMachine => _agentStateMachine;
         public InGameManager gameManager => _gameManager;
+        public CharacterController controller => _characterController;
         public Vector3 ballPosition => _ballPosition;
         public Vector3 fencePosition => _fencePosition;
         public Vector3 target => _target.transform.position;
@@ -47,9 +48,12 @@ namespace MiniFootball.Agent
         private CharacterController _characterController;
         private AgentMovement _agentMovement;
         private AgentController _target;
+        private AgentPassBall _passBall;
+        private Tweener _reactivateTween;
         private Vector3 _spawnPosition;
         private Vector3 _ballPosition;
         private Vector3 _fencePosition;
+        private float _reactiveTimeRemaining;
         private bool _hasBall = false;
         // private AgentMovement _agentMovement;
 
@@ -57,6 +61,7 @@ namespace MiniFootball.Agent
         {
             _characterController = GetComponent<CharacterController>();
             _agentMovement = GetComponent<AgentMovement>();
+            _passBall = GetComponent<AgentPassBall>();
             
             _agentStateMachine = new AgentStateMachine(this);
         }
@@ -114,36 +119,61 @@ namespace MiniFootball.Agent
             _agentMovement.MoveToPosition(position, callback);
         }
 
+        [ContextMenu("Pass Ball")]
         public void InactiveAgent()
         {
+            _hasBall = false;
+            _gameManager.agentManager.activeAgents.Remove(this);
+            _gameManager.agentManager.inactiveAgents.Add(this);
+            AgentController a = _gameManager.agentManager.ClosestDistance(this);
+
+            Debug.Log(!a ? $"ASU GA ADA TMN LAGI" : $"PASS KE {a.name}");
+
+            if (a)
+            {
+                a.WaitForBall();
+                _passBall.StartPass(a);
+            }
+            
             _agentMovement.SetMoveSpeed(0);
             _characterController.radius = 0f;
             _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
+            _reactivateTween = DOVirtual.Float(0, 1, agentAttackerReactivateTime,
+                value => _reactiveTimeRemaining = value)
+                .OnComplete(() =>
+                {
+                    _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
+                });
         }
 
         public void ReturnToPatrol()
         {
             _agentMovement.SetMoveSpeed(_agentMovement.returnSpeedDefender);
             _characterController.radius = 0f;
+            defenderArea.gameObject.SetActive(false);
             state = AgentState.ReturnToPatrol;
         }
 
         public void ChaseAgentWithBall(AgentController targetAgent)
         {
             _target = targetAgent;
+            Debug.Log($"{_target.name}");
             _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
             _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedDefender);
-            animator.SetBool(HasTarget, true);
-            _characterController.radius = .25f;
-            state = AgentState.ChaseTarget;
+        }
+        
+        private void WaitForBall()
+        {
+            _agentMovement.SetMoveSpeed(0);
         }
         
         private void BallCatch(AgentController agentWithBall)
         {
-            this.state = AgentState.GoToFence;
+            if (side == MatchSide.Attacker)
+                this.state = AgentState.GoToFence;
+            
             if (agentWithBall != this) return;
 
-            _characterController.radius = .275f;
             _hasBall = true;
             _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedWithBall);
             ballIndicator.SetActive(true);

@@ -71,6 +71,11 @@ namespace MiniFootball.Game
             return ball.transform.position;
         }
 
+        public GameObject GetBall()
+        {
+            return ball;
+        }
+
         public Vector3 GetFencePosition(MatchSide side)
         {
             switch (side)

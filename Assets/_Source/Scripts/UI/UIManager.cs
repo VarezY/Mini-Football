@@ -1,6 +1,4 @@
-﻿using System;
-using MiniFootball.Agent;
-using MiniFootball.Game;
+﻿using MiniFootball.Agent;
 using MiniFootball.UI.Timer;
 using TMPro;
 using UnityEngine;
