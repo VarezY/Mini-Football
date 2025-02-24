@@ -8,6 +8,7 @@
         GoToFence,
         Passing,
         ChaseTarget,
+        ReturnToPatrol,
         Inactive,
     }
 }

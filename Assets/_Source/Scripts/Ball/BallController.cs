@@ -1,5 +1,6 @@
 ﻿using System;
 using MiniFootball.Agent;
+using MiniFootball.Game;
 using UnityEngine;
 
 namespace MiniFootball.Ball
@@ -11,9 +12,15 @@ namespace MiniFootball.Ball
             if (!other.CompareTag("Agent")) return;
             
             bool isAgent = other.TryGetComponent(out AgentController agent);
-            this.transform.parent = other.transform;
-            this.transform.localPosition = new Vector3(0, 0.2f, 0.75f);
-            if (isAgent) InGameManager.instance.InGameEvents.BallCatch(agent);
+            
+            if (!isAgent) return;
+            
+            if (agent.side == MatchSide.Attacker)
+            {
+                InGameManager.instance.InGameEvents.BallCatch(agent);
+                this.transform.parent = other.transform;
+                this.transform.localPosition = new Vector3(0, 0.2f, 0.75f);
+            }
         }
     }
 }

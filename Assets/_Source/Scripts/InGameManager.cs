@@ -1,4 +1,5 @@
-﻿using MiniFootball.Agent;
+﻿using System;
+using MiniFootball.Agent;
 using MiniFootball.Game;
 using MiniFootball.UI;
 using UnityEngine;
@@ -29,6 +30,11 @@ namespace MiniFootball
             uiManager = GetComponentInChildren<UIManager>();
             matchManager = GetComponentInChildren<MatchManager>();
             agentManager = GetComponentInChildren<AgentManager>();
+        }
+
+        private void Start()
+        {
+            StartGame();
         }
 
         [ContextMenu("Start Game")]

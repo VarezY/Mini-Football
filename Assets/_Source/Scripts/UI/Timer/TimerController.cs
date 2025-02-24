@@ -29,7 +29,7 @@ namespace MiniFootball.UI.Timer
 
         public void RestartTimer()
         {
-            timerOutline.fillAmount = 1;
+            timerOutline.DOFillAmount(1, 0);
             StartTimer();
         }
         

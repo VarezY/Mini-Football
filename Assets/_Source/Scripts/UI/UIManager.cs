@@ -31,7 +31,12 @@ namespace MiniFootball.UI
 
         private void OnDisable()
         {
-            this.WaitAndUnSubscribe(() => InGameManager.instance.InGameEvents.OnStartGame -= StartMatch);
+            this.WaitAndUnSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnStartGame -= StartMatch;
+                InGameManager.instance.InGameEvents.OnNextMatch -= NextMatch;
+
+            });
         }
 
         private void StartMatch()

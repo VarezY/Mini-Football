@@ -17,6 +17,7 @@ namespace MiniFootball.Agent
         {
             _agentController.state = _agentController.gameManager.matchManager.isBallOnPlayer? AgentState.GoToFence : AgentState.SearchingBall;
             _agentController.ChangeColor(_agentController.flagColor);
+            _agentController.defenderIndicator.SetActive(false);
             _agentController.animator.SetFloat(Speed, 1.0f);
             _agentController.arrowIndicator.SetActive(true);
         }
@@ -30,6 +31,16 @@ namespace MiniFootball.Agent
                     break;
                 case AgentState.GoToFence:
                     _agentController.MoveAgent(_agentController.fencePosition);
+                    break;
+                case AgentState.ChaseTarget:
+                    _agentController.MoveAgent(_agentController.target);
+                    break;
+                case AgentState.ReturnToPatrol:
+                    
+                    _agentController.MoveAgent(_agentController.patrolPosition, () =>
+                    {
+                        _agentController.agentStateMachine.TransitionTo(_agentController.agentStateMachine.IdleState);
+                    });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

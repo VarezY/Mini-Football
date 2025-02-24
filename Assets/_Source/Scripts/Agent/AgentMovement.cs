@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MiniFootball.Agent
 {
@@ -7,6 +8,8 @@ namespace MiniFootball.Agent
         [SerializeField] private float moveSpeed = 1.5f;
         public float moveSpeedWithBall = 0.75f;
         public float moveSpeedNormal = 0.75f;
+        public float moveSpeedDefender = 1f;
+        public float returnSpeedDefender = 2f;
         [SerializeField] private float stoppingDistance = 0.1f;
 
         private CharacterController _controller;
@@ -21,12 +24,16 @@ namespace MiniFootball.Agent
             moveSpeed = speed;
         }
 
-        public void MoveToPosition(Vector3 targetPosition)
+        public void MoveToPosition(Vector3 targetPosition, Action onDestinationReached = null)
         {
             Vector3 direction = (targetPosition - transform.position);
             direction.y = 0; // Lock y axis
 
-            if (!(direction.magnitude > stoppingDistance)) return;
+            if (!(direction.magnitude > stoppingDistance))
+            {
+                onDestinationReached?.Invoke();
+                return;
+            }
             
             direction = direction.normalized;
             

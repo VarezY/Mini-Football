@@ -16,6 +16,8 @@ namespace MiniFootball.Agent
         {
             _agentController.ChangeColor(_agentController.flagColor);
             _agentController.animator.SetTrigger(Patrol);
+            _agentController.defenderIndicator.SetActive(true);
+            _agentController.defenderArea.gameObject.SetActive(true);
         }
 
         public void Update()

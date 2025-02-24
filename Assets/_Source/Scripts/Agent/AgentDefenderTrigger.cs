@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MiniFootball.Agent
 {
-    public class AgentTrigger : MonoBehaviour
+    public class AgentDefenderTrigger : MonoBehaviour
     {
         private AgentController _agentController;
         
@@ -14,12 +14,16 @@ namespace MiniFootball.Agent
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag("Player")) return;
-            if (!TryGetComponent(out AgentController agentController)) return;
-            if (agentController.hasBall)
+            if (!other.CompareTag("Agent")) return;
+            
+            if (other.TryGetComponent(out AgentController agentController))
             {
+                if (!agentController.hasBall) return;
+                
+                Debug.Log($"Player {other.name} trigger entered with Ball");
                 _agentController.ChaseAgentWithBall(agentController);
             }
+            
         }
     }
 }

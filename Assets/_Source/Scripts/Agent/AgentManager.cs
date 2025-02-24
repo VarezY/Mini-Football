@@ -30,6 +30,7 @@ namespace MiniFootball.Agent
             for(int i = 0; i < amountToPool; i++)
             {
                 GameObject tmp = Instantiate(objectToPool);
+                tmp.name = $"PooledObject{i}";
                 tmp.SetActive(false);
                 pooledObjects.Add(tmp);
             }
