@@ -11,9 +11,11 @@ namespace MiniFootball.Game
             if (!other.CompareTag("Agent")) return;
 
             if (!other.TryGetComponent(out AgentController agentController)) return;
-            Destroy(agentController.gameObject);
+            agentController.ResetAgent();
+            agentController.gameObject.SetActive(false);
             
             if (!agentController.hasBall) return;
+            InGameManager.instance.NextMatch(agentController.agentType);
             Debug.Log($"Scored by {other.name}");
         }
     }    

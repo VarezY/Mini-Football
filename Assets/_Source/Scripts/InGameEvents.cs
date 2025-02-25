@@ -17,6 +17,13 @@ namespace MiniFootball
             OnNextMatch?.Invoke();
         }
         
+        public event Action OnTimerEnd;
+
+        public void TimerEnd()
+        {
+            OnTimerEnd?.Invoke();
+        }
+        
         public event Action<AgentController> OnBallCatch;
 
         public void BallCatch(AgentController agent)
@@ -24,8 +31,18 @@ namespace MiniFootball
             OnBallCatch?.Invoke(agent);
         }
 
-        public event Action<AgentController> OnTriggerDefender;
+        public event Action<AgentType> OnScoredGoal;
 
-        // public event Action OnEndGame;
+        public void ScoredGoal(AgentType scoredAgent)
+        {
+            OnScoredGoal?.Invoke(scoredAgent);
+        }
+
+        public event Action OnEndGame;
+
+        public void EndGame()
+        {
+            OnEndGame?.Invoke();
+        }
     }
 }

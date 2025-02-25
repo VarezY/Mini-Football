@@ -24,7 +24,10 @@ namespace MiniFootball.UI
         public void HideBar()
         {
             _bar.fillAmount = 0;
-            _bar.DOFade(0.5f, 0f);
+            Color tempColor = _bar.color;
+            tempColor.a = .5f;
+            _bar.color = tempColor;
+            gameObject.SetActive(false);
         }
 
         [ContextMenu("Recharge Energy")]

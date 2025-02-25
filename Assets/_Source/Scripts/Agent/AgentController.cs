@@ -10,6 +10,7 @@ namespace MiniFootball.Agent
     {
         private static readonly int Color1 = Shader.PropertyToID("_BaseColor");
 
+        public AgentType agentType;
         public AgentState state = AgentState.Idle;
         
         [Header("Agent Configuration")] 
@@ -36,7 +37,6 @@ namespace MiniFootball.Agent
         public InGameManager gameManager => _gameManager;
         public CharacterController controller => _characterController;
         public Vector3 ballPosition => _ballPosition;
-        public Vector3 fencePosition => _fencePosition;
         public Vector3 target => _target.transform.position;
         public Vector3 patrolPosition => _spawnPosition;
         public bool hasBall => _hasBall;
@@ -52,8 +52,7 @@ namespace MiniFootball.Agent
         private Tweener _reactivateTween;
         private Vector3 _spawnPosition;
         private Vector3 _ballPosition;
-        private Vector3 _fencePosition;
-        private float _reactiveTimeRemaining;
+        private float _reactiveTimeRemaining; //Debuging for Agent UI
         private bool _hasBall = false;
         // private AgentMovement _agentMovement;
 
@@ -68,9 +67,12 @@ namespace MiniFootball.Agent
 
         private void OnEnable()
         {
+            _spawnPosition = transform.position;
+            StartCoroutine(InitializeAgent());
             StartCoroutine(this.WaitAndSubscribe(() =>
             {
                 InGameManager.instance.InGameEvents.OnBallCatch += BallCatch;
+                InGameManager.instance.InGameEvents.OnNextMatch += KillReactivateTime;
             }));
         }
 
@@ -79,23 +81,24 @@ namespace MiniFootball.Agent
             this.WaitAndUnSubscribe(() =>
             {
                 InGameManager.instance.InGameEvents.OnBallCatch -= BallCatch;
+                InGameManager.instance.InGameEvents.OnNextMatch -= KillReactivateTime;
             });
         }
 
-        private IEnumerator Start()
+        private void Start()
         {
             _gameManager = InGameManager.instance;
-            _ballPosition = _gameManager.matchManager.GetBallPosition();
-            _fencePosition = _gameManager.matchManager.GetFencePosition(side);
-            _spawnPosition = transform.position;
-            ChangeColor(inactiveColor);
-            _agentStateMachine.Initialize(_agentStateMachine.IdleState);
+        }
 
-            
+        private IEnumerator InitializeAgent()
+        {
+            _agentStateMachine.Initialize(_agentStateMachine.IdleState);
+ 
             yield return new WaitForSeconds(agentTimeToSpawn);
             switch (side)
             {
                 case MatchSide.Attacker:
+                    _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedNormal);
                     _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
                     break;
                 case MatchSide.Defender:
@@ -109,6 +112,11 @@ namespace MiniFootball.Agent
             _agentStateMachine.Update();
         }
 
+        public void SetBallPosition(Vector3 position)
+        {
+            _ballPosition = position;
+        }
+        
         public void ChangeColor(Color color)
         {
             shirt.material.SetColor(Color1, color);
@@ -119,33 +127,58 @@ namespace MiniFootball.Agent
             _agentMovement.MoveToPosition(position, callback);
         }
 
-        [ContextMenu("Pass Ball")]
+        public void ResetAgent()
+        {
+            _gameManager.agentManager.activeAgents.Remove(this);
+            // _agentMovement.SetMoveSpeed(0);
+            _characterController.radius = 0f;
+            _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
+        }
+
         public void InactiveAgent()
         {
             _hasBall = false;
             _gameManager.agentManager.activeAgents.Remove(this);
-            _gameManager.agentManager.inactiveAgents.Add(this);
+            _agentMovement.SetMoveSpeed(0);
+            _characterController.radius = 0f;
+            _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
+            
             AgentController a = _gameManager.agentManager.ClosestDistance(this);
-
-            Debug.Log(!a ? $"ASU GA ADA TMN LAGI" : $"PASS KE {a.name}");
-
+            // Debug.Log(!a ? $"ASU GA ADA TMN LAGI" : $"PASS KE {a.name}");
+            
             if (a)
             {
                 a.WaitForBall();
                 _passBall.StartPass(a);
+                _reactivateTween = DOVirtual.Float(0, 1, agentAttackerReactivateTime,
+                        value => _reactiveTimeRemaining = value)
+                    .OnComplete(() =>
+                    {
+                        _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedNormal);
+                        _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
+                    });
             }
-            
-            _agentMovement.SetMoveSpeed(0);
-            _characterController.radius = 0f;
-            _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
-            _reactivateTween = DOVirtual.Float(0, 1, agentAttackerReactivateTime,
-                value => _reactiveTimeRemaining = value)
-                .OnComplete(() =>
+            else
+            {
+                switch (agentType)
                 {
-                    _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
-                });
+                    case AgentType.Enemy:
+                        _gameManager.NextMatch(AgentType.Player);
+                        break;
+                    case AgentType.Player:
+                        _gameManager.NextMatch(AgentType.Enemy);
+                        break;
+                }
+            }
         }
 
+        public void ChaseAgentWithBall(AgentController targetAgent)
+        {
+            _target = targetAgent;
+            _agentStateMachine.TransitionTo(_agentStateMachine.ChaseState);
+            _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedDefender);
+        }
+        
         public void ReturnToPatrol()
         {
             _agentMovement.SetMoveSpeed(_agentMovement.returnSpeedDefender);
@@ -153,18 +186,15 @@ namespace MiniFootball.Agent
             defenderArea.gameObject.SetActive(false);
             state = AgentState.ReturnToPatrol;
         }
-
-        public void ChaseAgentWithBall(AgentController targetAgent)
-        {
-            _target = targetAgent;
-            Debug.Log($"{_target.name}");
-            _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
-            _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedDefender);
-        }
         
         private void WaitForBall()
         {
             _agentMovement.SetMoveSpeed(0);
+        }
+
+        private void KillReactivateTime()
+        {
+            _reactivateTween?.Kill();
         }
         
         private void BallCatch(AgentController agentWithBall)
@@ -174,6 +204,8 @@ namespace MiniFootball.Agent
             
             if (agentWithBall != this) return;
 
+            _characterController.center = new Vector3(0, .5f, 0);
+            _characterController.radius = .25f;
             _hasBall = true;
             _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedWithBall);
             ballIndicator.SetActive(true);

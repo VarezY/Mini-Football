@@ -42,10 +42,17 @@ namespace MiniFootball
             InGameEvents.StartGame();
         }
 
-        [ContextMenu("Next Match")]
-        public void NextMatch()
+        public void NextMatch(AgentType scoredAgent)
         {
-            InGameEvents.NextMatch();
+            InGameEvents.ScoredGoal(scoredAgent);
+            if (matchManager.currentMatch == matchManager.maxMatches)
+            { 
+                InGameEvents.EndGame();
+            }
+            else
+            {
+                InGameEvents.NextMatch();
+            }
         }
     }
 }

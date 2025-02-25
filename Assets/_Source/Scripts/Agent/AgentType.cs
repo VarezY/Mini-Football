@@ -2,6 +2,6 @@
 {
     public enum AgentType
     {
-        Player, Enemy,
+        Player, Enemy, Null
     }
 }

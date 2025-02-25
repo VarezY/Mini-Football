@@ -21,12 +21,7 @@ namespace MiniFootball.UI
         
         private void Awake()
         {
-            _inactiveEnergyBars.Clear();
-            ActiveEnergyBars.Clear();
-            foreach (EnergyBar energyBar in energyBars)
-            {
-                _inactiveEnergyBars.Enqueue(energyBar);
-            }
+            InitializeEnergyBars();
         }
 
         [ContextMenu("Update energy text")]
@@ -38,28 +33,44 @@ namespace MiniFootball.UI
         public void ResetEnergyBars()
         {
             _bar.Kill();
-            _currentEnergyBar.HideBar();
             StopCoroutine(_updateEnergyBars);
+            
+            _currentEnergyBar.HideBar();
+            
             foreach (EnergyBar energyBar in ActiveEnergyBars)
             {
                 energyBar.HideBar();
-                energyBar.gameObject.SetActive(false);
             }
-            ActiveEnergyBars.Clear();
-            _inactiveEnergyBars.Clear();
-            energyText.text = "0";
-            foreach (EnergyBar energyBar in energyBars)
-            {
-                _inactiveEnergyBars.Enqueue(energyBar);
-            }
+            
+            InitializeEnergyBars();
+
             StartRecharge();
         }
 
+        public void RemoveCharge(int chargeNumber)
+        {
+            if (ActiveEnergyBars.Count < chargeNumber) return;
+
+            for (int i = 0; i < chargeNumber; i++)
+            {
+                EnergyBar x = ActiveEnergyBars.Dequeue();
+                _inactiveEnergyBars.Enqueue(x);
+                x.HideBar();
+            }
+            energyText.text = ActiveEnergyBars.Count.ToString();
+
+            if (!_finishedUpdateEnergyBars) return;
+
+            _finishedUpdateEnergyBars = false;
+            StartRecharge();
+        }
+        
         private IEnumerator RechargeEnergyBar()
         {
             while (_inactiveEnergyBars.Count > 0)
             {   
                 _currentEnergyBar = _inactiveEnergyBars.Dequeue();
+                _currentEnergyBar.transform.SetAsLastSibling();
                 _currentEnergyBar.gameObject.SetActive(true);
                 _bar = _currentEnergyBar.Recharge();
                 yield return _bar.WaitForCompletion();
@@ -69,34 +80,16 @@ namespace MiniFootball.UI
             
             _finishedUpdateEnergyBars = true;
         }
-        
-        public void RemoveCharge(int chargeNumber)
-        {
-            if (ActiveEnergyBars.Count < chargeNumber)
-                return;
 
-            for (int i = 0; i < chargeNumber; i++)
+        private void InitializeEnergyBars()
+        {
+            _inactiveEnergyBars.Clear();
+            ActiveEnergyBars.Clear();
+            energyText.text = "0";
+            foreach (EnergyBar energyBar in energyBars)
             {
-                EnergyBar x = ActiveEnergyBars.Dequeue();
-                _inactiveEnergyBars.Enqueue(x);
-                x.transform.SetAsLastSibling();
-                x.HideBar();
-                x.gameObject.SetActive(false);
+                _inactiveEnergyBars.Enqueue(energyBar);
             }
-            energyText.text = ActiveEnergyBars.Count.ToString();
-
-            if (!_finishedUpdateEnergyBars) 
-                return;
-
-            _finishedUpdateEnergyBars = false;
-            StopCoroutine(_updateEnergyBars);
-            StartRecharge();
-        }
-
-        [ContextMenu("Remove 2 Energy bars")]
-        private void RemoveTwoCharge()
-        {
-            RemoveCharge(2);
         }
     }
 }

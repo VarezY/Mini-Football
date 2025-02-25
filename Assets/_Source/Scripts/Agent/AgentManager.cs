@@ -24,6 +24,7 @@ namespace MiniFootball.Agent
         private InGameManager _gameManager;
         private AgentType _agentType;
         private Camera _camera;
+        private BoxCollider _boxPlayer, _boxEnemy;
         private Vector3 _spawnPoint;
         private Vector3 _agentRotation;
         private bool _canSpawn;
@@ -44,9 +45,28 @@ namespace MiniFootball.Agent
             }
         }
 
+        private void OnEnable()
+        {
+            StartCoroutine(this.WaitAndSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnNextMatch += ResetPooledObjects;
+            }));
+        }
+
+        private void OnDisable()
+        {
+            this.WaitAndUnSubscribe(() =>
+            {
+                InGameManager.instance.InGameEvents.OnNextMatch -= ResetPooledObjects;
+
+            });
+        }
+
         private void Start()
         {
             _gameManager = InGameManager.instance;
+            _boxPlayer = _gameManager.matchManager.SpawnBox(AgentType.Player);
+            _boxEnemy = _gameManager.matchManager.SpawnBox(AgentType.Enemy);
         }
         
         private void Update()
@@ -61,8 +81,8 @@ namespace MiniFootball.Agent
                 SpawnSelectedAgent(AgentType.Enemy);
             }
         }
-        
-        public GameObject GetPooledObject()
+
+        private GameObject GetPooledObject()
         {
             for(int i = 0; i < amountToPool; i++)
             {
@@ -74,8 +94,10 @@ namespace MiniFootball.Agent
             return null;
         }
 
-        public void ResetPooledObjects()
+        private void ResetPooledObjects()
         {
+            activeAgents.Clear();
+            inactiveAgents.Clear();
             for (int i = 0; i < objectToPoolParent.childCount; i++)
             {
                 objectToPoolParent.GetChild(i).gameObject.SetActive(false);
@@ -86,11 +108,13 @@ namespace MiniFootball.Agent
         {
             GameObject selectedAgent = GetPooledObject();
             bool isAgent = selectedAgent.TryGetComponent(out AgentController agentController);
+            agentController.SetBallPosition(_gameManager.matchManager.GetBallPosition());
             switch (type)
             {
                 case AgentType.Player:
                     if (isAgent)
                     {
+                        agentController.agentType = AgentType.Player;
                         agentController.flagColor = playerColor;
                         agentController.side = _gameManager.matchManager.playerStatus;
                         _agentRotation = new Vector3(0, 0, 0);
@@ -99,6 +123,7 @@ namespace MiniFootball.Agent
                 case AgentType.Enemy:
                     if (isAgent)
                     {
+                        agentController.agentType = AgentType.Enemy;
                         agentController.flagColor = enemyColor;
                         agentController.side = _gameManager.matchManager.enemyStatus;
                         _agentRotation = new Vector3(0, 180, 0);
@@ -107,26 +132,11 @@ namespace MiniFootball.Agent
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-            
-            switch (agentController.side)
-            {
-                case MatchSide.Attacker:
-                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 2);
-                    break;
-                case MatchSide.Defender:
-                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 3);
-                    break;
-            }
 
-            if (!_canSpawn)
-            {
-                return;
-            }
-
-            SpawnAgent(selectedAgent);
+            SpawnAgent(selectedAgent, agentController.side, type);
         }
         
-        private void SpawnAgent(GameObject modifiedAgent)
+        private void SpawnAgent(GameObject modifiedAgent, MatchSide side, AgentType type)
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -135,10 +145,34 @@ namespace MiniFootball.Agent
                 _spawnPoint = hit.point;
             }
             _spawnPoint.y = 0f;
-
-            // Spawn from object pool
+           
             if (!modifiedAgent) return;
 
+            if (!hit.transform.TryGetComponent<BoxCollider>(out BoxCollider spawnArea)) return;
+
+            switch (type)
+            {
+                case AgentType.Player when spawnArea == _boxPlayer:
+                    break;
+                case AgentType.Enemy when spawnArea == _boxEnemy:
+                    break;
+                default:
+                    return;
+            }
+
+            switch (side)
+            {
+                case MatchSide.Attacker:
+                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 2);
+                    break;
+                case MatchSide.Defender:
+                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 3);
+                    break;
+            }
+            
+            if (!_canSpawn) return;
+
+            // Spawn from object pool
             modifiedAgent.transform.position = _spawnPoint;
             modifiedAgent.transform.Rotate(_agentRotation);
             modifiedAgent.SetActive(true);
@@ -146,7 +180,7 @@ namespace MiniFootball.Agent
 
         public void SwitchAgentStatus(AgentController agent)
         {
-            if (agent.side == MatchSide.Attacker && agent.state != AgentState.Idle) activeAgents.Add(agent);
+            activeAgents.Add(agent);
         }
 
         public AgentController ClosestDistance(AgentController agentPivot)
