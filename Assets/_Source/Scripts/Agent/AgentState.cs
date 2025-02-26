@@ -6,9 +6,10 @@
         GetUp,
         SearchingBall,
         GoToFence,
-        Passing,
+        Patrol,
         ChaseTarget,
         ReturnToPatrol,
+        InFence,
         Inactive,
     }
 }

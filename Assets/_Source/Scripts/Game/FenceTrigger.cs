@@ -12,7 +12,6 @@ namespace MiniFootball.Game
 
             if (!other.TryGetComponent(out AgentController agentController)) return;
             agentController.ResetAgent();
-            agentController.gameObject.SetActive(false);
             
             if (!agentController.hasBall) return;
             InGameManager.instance.NextMatch(agentController.agentType);

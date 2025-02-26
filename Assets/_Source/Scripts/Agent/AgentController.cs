@@ -9,6 +9,8 @@ namespace MiniFootball.Agent
     public class AgentController : MonoBehaviour
     {
         private static readonly int Color1 = Shader.PropertyToID("_BaseColor");
+        private static readonly int Pass = Animator.StringToHash("Pass");
+        private static readonly int Tackle = Animator.StringToHash("Tackle");
 
         public AgentType agentType;
         public AgentState state = AgentState.Idle;
@@ -50,6 +52,7 @@ namespace MiniFootball.Agent
         private AgentController _target;
         private AgentPassBall _passBall;
         private Tweener _reactivateTween;
+        private Sequence _tackleSequence;
         private Vector3 _spawnPosition;
         private Vector3 _ballPosition;
         private float _reactiveTimeRemaining; //Debuging for Agent UI
@@ -61,7 +64,7 @@ namespace MiniFootball.Agent
             _characterController = GetComponent<CharacterController>();
             _agentMovement = GetComponent<AgentMovement>();
             _passBall = GetComponent<AgentPassBall>();
-            
+
             _agentStateMachine = new AgentStateMachine(this);
         }
 
@@ -88,6 +91,7 @@ namespace MiniFootball.Agent
         private void Start()
         {
             _gameManager = InGameManager.instance;
+            _tackleSequence = DOTween.Sequence();
         }
 
         private IEnumerator InitializeAgent()
@@ -130,9 +134,8 @@ namespace MiniFootball.Agent
         public void ResetAgent()
         {
             _gameManager.agentManager.activeAgents.Remove(this);
-            // _agentMovement.SetMoveSpeed(0);
             _characterController.radius = 0f;
-            _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
+            _agentStateMachine.TransitionTo(_agentStateMachine.DeactivateState);
         }
 
         public void InactiveAgent()
@@ -149,6 +152,7 @@ namespace MiniFootball.Agent
             if (a)
             {
                 a.WaitForBall();
+                animator.SetTrigger(Pass);
                 _passBall.StartPass(a);
                 _reactivateTween = DOVirtual.Float(0, 1, agentAttackerReactivateTime,
                         value => _reactiveTimeRemaining = value)
@@ -184,7 +188,7 @@ namespace MiniFootball.Agent
             _agentMovement.SetMoveSpeed(_agentMovement.returnSpeedDefender);
             _characterController.radius = 0f;
             defenderArea.gameObject.SetActive(false);
-            state = AgentState.ReturnToPatrol;
+            animator.SetTrigger(Tackle);
         }
         
         private void WaitForBall()

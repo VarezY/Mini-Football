@@ -12,6 +12,7 @@ namespace MiniFootball.Agent
         public RunState RunState;
         public PatrolState PatrolState;
         public ChaseState ChaseState;
+        public DeactivateState DeactivateState;
         /*
         public WalkState walkState;
         public JumpState jumpState;
@@ -28,6 +29,7 @@ namespace MiniFootball.Agent
             this.RunState = new RunState(player);
             this.PatrolState = new PatrolState(player);
             this.ChaseState = new ChaseState(player);
+            this.DeactivateState = new DeactivateState(player);
             // create an instance for each state and pass in PlayerController
             /*
             this.walkState = new WalkState(player);

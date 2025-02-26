@@ -47,15 +47,6 @@ namespace MiniFootball.Agent
                 case AgentState.GoToFence:
                     _agentController.MoveAgent(_targetFencePosition);
                     break;
-                /*case AgentState.ChaseTarget:
-                    _agentController.MoveAgent(_agentController.target);
-                    break;
-                case AgentState.ReturnToPatrol:
-                    _agentController.MoveAgent(_agentController.patrolPosition, () =>
-                    {
-                        _agentController.agentStateMachine.TransitionTo(_agentController.agentStateMachine.IdleState);
-                    });
-                    break;*/
                 default:
                     throw new ArgumentOutOfRangeException();
             }

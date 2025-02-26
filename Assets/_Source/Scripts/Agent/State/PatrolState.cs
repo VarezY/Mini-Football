@@ -16,6 +16,7 @@ namespace MiniFootball.Agent
         
         public void Enter()
         {
+            _agentController.state = AgentState.Patrol;
             _agentController.ChangeColor(_agentController.flagColor);
             _agentController.animator.SetTrigger(Patrol);
             _agentController.animator.SetBool(HasTarget, false);

@@ -5540,6 +5540,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3282608433033884744}
   - component: {fileID: 2793914394501705457}
+  - component: {fileID: 321480601213311990}
   m_Layer: 0
   m_Name: Armature
   m_TagString: Untagged
@@ -5588,6 +5589,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &321480601213311990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2793914394501705458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0254b99f8b044bd1944033ec8ef64a8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2848997689930871526
 GameObject:
   m_ObjectHideFlags: 0
@@ -5852,6 +5865,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4402d24cc194c67a19ef626e2b4ff1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentType: 0
   state: 0
   side: 0
   animator: {fileID: 2793914394501705457}
@@ -5909,8 +5923,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c4d326c90744ffca6403ef481989968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasBall: 0
-  passRange: 10
   passSpeed: 1.5
 --- !u!1 &2851339606805506402
 GameObject:
