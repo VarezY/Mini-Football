@@ -1,8 +1,10 @@
 ﻿using System;
+using DG.Tweening;
 using MiniFootball.Agent;
 using MiniFootball.UI.Timer;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MiniFootball.UI
 {
@@ -12,6 +14,8 @@ namespace MiniFootball.UI
 
         [Header("Game UI")]
         [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private Text winnerText;
+        [SerializeField] private GameObject playAgainButotn, exitButton;
         
         [Header("Player UI")]
         [SerializeField] private TMP_Text playerName;
@@ -69,7 +73,6 @@ namespace MiniFootball.UI
             scoreText.text = $"<color=red>{_playerScore}<color=black> - <color=blue>{_enemyScore}";
         }
         
-        [ContextMenu("Next Match")]
         private void NextMatch()
         {
             timerController.RestartTimer();
@@ -81,15 +84,29 @@ namespace MiniFootball.UI
             if (_playerScore > _enemyScore)
             {
                 Debug.Log("Player WIN the game");
+                AnimateWin($"GAME OVER\n<color=red>PLAYER</color> WIN!");
             }
             else if (_playerScore < _enemyScore)
             {
+                AnimateWin($"GAME OVER\n<color=blue>ENEMY</color> WIN!");
                 Debug.Log("Enemy WIN the game");
             }
             else
             {
                 Debug.Log("GAME END IN DRAW - GO TO PENALTY");
             }
+        }
+
+        private void AnimateWin(string winText)
+        {
+            winnerText.text = winText;
+            winnerText.rectTransform.DOScale(2f, 1f)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() =>
+                {
+                    playAgainButotn.SetActive(true);
+                    exitButton.SetActive(true);
+                });
         }
     }
 }

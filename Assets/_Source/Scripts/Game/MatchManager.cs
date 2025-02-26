@@ -177,8 +177,6 @@ namespace MiniFootball.Game
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
-        
-        
 
         private void StartMatch()
         {
