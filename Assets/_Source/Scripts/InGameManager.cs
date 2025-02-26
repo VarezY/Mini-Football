@@ -32,10 +32,6 @@ namespace MiniFootball
             agentManager = GetComponentInChildren<AgentManager>();
         }
 
-        private void Start()
-        {
-        }
-
         [ContextMenu("Start Game")]
         public void StartGame()
         {

@@ -42,6 +42,11 @@ namespace MiniFootball.UI.Timer
             _timerTween?.Kill();
             StartTimer();
         }
-        
+
+        public void StopTimer()
+        {
+            _outlineTween?.Kill();
+            _timerTween?.Kill();
+        }
     }
 }

@@ -14,11 +14,9 @@ namespace MiniFootball.UI
         [SerializeField] private TMP_Text scoreText;
         
         [Header("Player UI")]
-        [SerializeField] private EnergyBarController playerBarController;
         [SerializeField] private TMP_Text playerName;
         
         [Header("Enemy UI")]
-        [SerializeField] private EnergyBarController enemyBarController;
         [SerializeField] private TMP_Text enemyName;
 
         private int _playerScore;
@@ -31,7 +29,7 @@ namespace MiniFootball.UI
                 InGameManager.instance.InGameEvents.OnStartGame += StartMatch;
                 InGameManager.instance.InGameEvents.OnNextMatch += NextMatch;
                 InGameManager.instance.InGameEvents.OnScoredGoal += UpdatePlayerScore;
-                
+                InGameManager.instance.InGameEvents.OnEndGame += ShowWinner;
             }));
         }
 
@@ -42,29 +40,15 @@ namespace MiniFootball.UI
                 InGameManager.instance.InGameEvents.OnStartGame -= StartMatch;
                 InGameManager.instance.InGameEvents.OnNextMatch -= NextMatch;
                 InGameManager.instance.InGameEvents.OnScoredGoal -= UpdatePlayerScore;
+                InGameManager.instance.InGameEvents.OnEndGame -= ShowWinner;
             });
         }
         
-        public bool RemoveCharge(AgentType type, int charge)
-        {
-            switch (type)
-            {
-                case AgentType.Player when charge <= playerBarController.ActiveEnergyBars.Count:
-                    playerBarController.RemoveCharge(charge);
-                    return true;
-                case AgentType.Enemy when charge <= enemyBarController.ActiveEnergyBars.Count:
-                    enemyBarController.RemoveCharge(charge);
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
         private void StartMatch()
         {
             timerController.StartTimer();
-            playerBarController.StartRecharge();
-            enemyBarController.StartRecharge();
+            // playerBarController.StartRecharge();
+            // enemyBarController.StartRecharge();
         }
 
         private void UpdatePlayerScore(AgentType type)
@@ -85,11 +69,27 @@ namespace MiniFootball.UI
             scoreText.text = $"<color=red>{_playerScore}<color=black> - <color=blue>{_enemyScore}";
         }
         
+        [ContextMenu("Next Match")]
         private void NextMatch()
         {
             timerController.RestartTimer();
-            playerBarController.ResetEnergyBars();
-            enemyBarController.ResetEnergyBars();
+        }
+
+        private void ShowWinner()
+        {
+            timerController.StopTimer();
+            if (_playerScore > _enemyScore)
+            {
+                Debug.Log("Player WIN the game");
+            }
+            else if (_playerScore < _enemyScore)
+            {
+                Debug.Log("Enemy WIN the game");
+            }
+            else
+            {
+                Debug.Log("GAME END IN DRAW - GO TO PENALTY");
+            }
         }
     }
 }

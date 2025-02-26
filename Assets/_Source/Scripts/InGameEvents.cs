@@ -5,6 +5,19 @@ namespace MiniFootball
 {
     public struct InGameEvents
     {
+        #region UI Events
+
+        public event Action<AgentType, float> OnEnergyChanged;
+
+        public void EnergyChanged(AgentType type, float energy)
+        {
+            OnEnergyChanged?.Invoke(type, energy);
+        }
+
+        #endregion
+
+        #region Game Events
+
         public event Action OnStartGame;
         public void StartGame()
         {
@@ -16,12 +29,12 @@ namespace MiniFootball
         {
             OnNextMatch?.Invoke();
         }
-        
-        public event Action OnTimerEnd;
 
-        public void TimerEnd()
+        public event Action OnEndGame;
+
+        public void EndGame()
         {
-            OnTimerEnd?.Invoke();
+            OnEndGame?.Invoke();
         }
         
         public event Action<AgentController> OnBallCatch;
@@ -30,7 +43,7 @@ namespace MiniFootball
         {
             OnBallCatch?.Invoke(agent);
         }
-
+        
         public event Action<AgentType> OnScoredGoal;
 
         public void ScoredGoal(AgentType scoredAgent)
@@ -38,11 +51,6 @@ namespace MiniFootball
             OnScoredGoal?.Invoke(scoredAgent);
         }
 
-        public event Action OnEndGame;
-
-        public void EndGame()
-        {
-            OnEndGame?.Invoke();
-        }
+        #endregion
     }
 }

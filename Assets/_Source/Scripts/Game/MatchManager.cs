@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using MiniFootball.Agent;
+using MiniFootball.UI;
+using MiniFootball.UI.NewEnergyBar;
 using UnityEngine;
 
 namespace MiniFootball.Game
@@ -23,29 +26,28 @@ namespace MiniFootball.Game
         public MatchSide enemyStatus = MatchSide.Defender;
         public bool isBallOnPlayer;
 
-        [Header("Match Configuration")] [SerializeField]
-        private GameObject ball;
-
+        [Header("Match Configuration")] 
+        [SerializeField] private GameObject ball;
+        public Transform stadiumGround;
         public int maxMatches = 6;
         public int timer = 140;
         public int timeToFillEnergy = 2;
 
-        [Header("Player Configuration")] [SerializeField]
-        private BoxCollider spawnPlayerArea;
-
+        [Header("Player Configuration")]
+        [SerializeField] private BoxCollider spawnPlayerArea;
         [SerializeField] private BoxCollider fencePlayer;
         [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private EnergySystem playerEnergySystem;
 
-        [Header("Enemy Configuration")] [SerializeField]
-        private BoxCollider spawnEnemyArea;
-
+        [Header("Enemy Configuration")] 
+        [SerializeField] private BoxCollider spawnEnemyArea;
         [SerializeField] private BoxCollider fenceEnemy;
         [SerializeField] private GameObject enemyPrefab;
+        [SerializeField] private EnergySystem enemyEnergySystem;
 
-        private Camera _camera;
-        private Vector3 _allocPos;
-        private int _tmp;
-
+        private Coroutine _rechargePlayerCoroutine = null;
+        private Coroutine _rechargeEnemyCoroutine = null;
+        
         private void OnEnable()
         {
             StartCoroutine(this.WaitAndSubscribe(() =>
@@ -70,9 +72,76 @@ namespace MiniFootball.Game
 
         private void Start()
         {
-            _camera = Camera.main;
+            playerEnergySystem.Initialize(this);
+            enemyEnergySystem.Initialize(this);
         }
 
+        private void OnDestroy()
+        {
+            playerEnergySystem.Cleanup();
+            enemyEnergySystem.Cleanup();        }
+
+        public bool CanSpawn(AgentType type, int requiredEnergy)
+        {
+            switch (type)
+            {
+                case AgentType.Player when requiredEnergy <= playerEnergySystem.CurrentEnergy:
+                    DecreaseEnergy(type, requiredEnergy);
+                    return true;
+                case AgentType.Enemy when requiredEnergy <= enemyEnergySystem.CurrentEnergy:
+                    DecreaseEnergy(type, requiredEnergy);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void IncreaseEnergy(AgentType type, float amount)
+        {
+            switch (type)
+            {
+                case AgentType.Player:
+                    playerEnergySystem.IncreaseEnergy(amount);
+                    break;
+                case AgentType.Enemy:
+                    enemyEnergySystem.IncreaseEnergy(amount);
+                    break;
+            }
+        }
+
+        private void DecreaseEnergy(AgentType type, float amount)
+        {
+            switch (type)
+            {
+                case AgentType.Player:
+                    playerEnergySystem.DecreaseEnergy(amount);
+                    break;
+                case AgentType.Enemy:
+                    enemyEnergySystem.DecreaseEnergy(amount);
+                    break;
+            }
+        }
+
+        [ContextMenu("Add Energy To Player")]
+        private void AddEnergy()
+        {
+            IncreaseEnergy(AgentType.Player, .4f);
+        }
+        
+        
+        [ContextMenu("Remove Energy To Player")]
+        private void RemoveEnergy()
+        {
+            DecreaseEnergy(AgentType.Player, .3f);
+        }
+        
+        [ContextMenu("AAAAAAA")]
+        private void StartMatchManually()
+        {
+            playerEnergySystem.StartRecharging();
+            enemyEnergySystem.StartRecharging();
+        }
+        
         public Vector3 GetBallPosition()
         {
             return ball.transform.position;
@@ -108,8 +177,9 @@ namespace MiniFootball.Game
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+        
+        
 
-    [ContextMenu("Start Match")]
         private void StartMatch()
         {
             if (playerStatus == MatchSide.Attacker && enemyStatus == MatchSide.Defender)
@@ -124,6 +194,9 @@ namespace MiniFootball.Game
             {
                 SpawnBall(spawnPlayerArea);
             }
+            
+            playerEnergySystem.StartRecharging();
+            enemyEnergySystem.StartRecharging();
         }
 
         private void UpdatePlayerScore(AgentType type)
@@ -149,6 +222,8 @@ namespace MiniFootball.Game
             enemyStatus = enemyStatus == MatchSide.Attacker ? MatchSide.Defender : MatchSide.Attacker;
             currentMatch++;
             isBallOnPlayer = false;
+            playerEnergySystem.RestartRecharge();
+            enemyEnergySystem.RestartRecharge();
             StartMatch();
         }
         

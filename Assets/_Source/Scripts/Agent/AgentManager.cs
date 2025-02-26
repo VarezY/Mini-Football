@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MiniFootball.Game;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MiniFootball.Agent
 {
@@ -14,6 +15,8 @@ namespace MiniFootball.Agent
         public int amountToPool;
 
         [Header("Agent Settings")] 
+        [SerializeField] private int attackerSpawnEnergy;
+        [SerializeField] private int defenderSpawnEnergy;
         public Color playerColor;
         public Color enemyColor;
 
@@ -28,6 +31,7 @@ namespace MiniFootball.Agent
         private Vector3 _spawnPoint;
         private Vector3 _agentRotation;
         private bool _canSpawn;
+        
 
         private void Awake()
         {
@@ -73,14 +77,30 @@ namespace MiniFootball.Agent
         {
             if (Input.GetMouseButtonDown(0))
             {
-                SpawnSelectedAgent(AgentType.Player);
-            }
-
-            if (Input.GetMouseButtonDown(1))
-            {
-                SpawnSelectedAgent(AgentType.Enemy);
+                SpawnAgentOnField();
             }
         }
+
+        public void SwitchAgentStatus(AgentController agent)
+        {
+            activeAgents.Add(agent);
+        }
+
+        public AgentController ClosestDistance(AgentController agentPivot)
+        {
+            float closestDistance = Mathf.Infinity;
+            AgentController closest = null;
+            foreach (AgentController agent in activeAgents)
+            {
+                float distance = Vector3.Distance(agentPivot.transform.position, agent.transform.position);
+                if (distance > closestDistance) continue;
+                
+                closestDistance = distance;
+                closest = agent;
+            }
+
+            return closest;
+        }        
 
         private GameObject GetPooledObject()
         {
@@ -104,39 +124,7 @@ namespace MiniFootball.Agent
             }
         }
 
-        private void SpawnSelectedAgent(AgentType type)
-        {
-            GameObject selectedAgent = GetPooledObject();
-            bool isAgent = selectedAgent.TryGetComponent(out AgentController agentController);
-            agentController.SetBallPosition(_gameManager.matchManager.GetBallPosition());
-            switch (type)
-            {
-                case AgentType.Player:
-                    if (isAgent)
-                    {
-                        agentController.agentType = AgentType.Player;
-                        agentController.flagColor = playerColor;
-                        agentController.side = _gameManager.matchManager.playerStatus;
-                        _agentRotation = new Vector3(0, 0, 0);
-                    }
-                    break;
-                case AgentType.Enemy:
-                    if (isAgent)
-                    {
-                        agentController.agentType = AgentType.Enemy;
-                        agentController.flagColor = enemyColor;
-                        agentController.side = _gameManager.matchManager.enemyStatus;
-                        _agentRotation = new Vector3(0, 180, 0);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-
-            SpawnAgent(selectedAgent, agentController.side, type);
-        }
-        
-        private void SpawnAgent(GameObject modifiedAgent, MatchSide side, AgentType type)
+        private void SpawnAgentOnField()
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -145,58 +133,75 @@ namespace MiniFootball.Agent
                 _spawnPoint = hit.point;
             }
             _spawnPoint.y = 0f;
-           
-            if (!modifiedAgent) return;
-
-            if (!hit.transform.TryGetComponent<BoxCollider>(out BoxCollider spawnArea)) return;
-
-            switch (type)
+            
+            if (!hit.transform.TryGetComponent(out BoxCollider spawnArea)) return;
+            
+            // Constructor for an Agent
+            AgentType agentType = AgentType.Null;
+            MatchSide side;
+            Color flagColor;
+            Vector3 faceDirection;
+            
+            // Set the variables
+            if (spawnArea == _boxPlayer)
             {
-                case AgentType.Player when spawnArea == _boxPlayer:
-                    break;
-                case AgentType.Enemy when spawnArea == _boxEnemy:
-                    break;
-                default:
-                    return;
+                agentType = AgentType.Player;
+                side = _gameManager.matchManager.playerStatus;
+                flagColor = playerColor;
+                faceDirection = new Vector3(0, 0, 0);
             }
+            else if (spawnArea == _boxEnemy)
+            {
+                agentType = AgentType.Enemy;
+                side = _gameManager.matchManager.enemyStatus;
+                flagColor = enemyColor;
+                faceDirection = new Vector3(0, 180, 0);
+            }
+            else return;
 
+            // Construct it
+            GameObject selectedAgent = ModifyAgent(agentType, side, flagColor);
+            if (!selectedAgent) return;
+            
+            // Check if the energy is available
+            bool canSpawn = false;
             switch (side)
             {
-                case MatchSide.Attacker:
-                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 2);
+                case MatchSide.Attacker when agentType == AgentType.Player:
+                    canSpawn = _gameManager.matchManager.CanSpawn(AgentType.Player, attackerSpawnEnergy);
                     break;
-                case MatchSide.Defender:
-                    _canSpawn = _gameManager.uiManager.RemoveCharge(type, 3);
+                case MatchSide.Defender when agentType == AgentType.Player:
+                    canSpawn = _gameManager.matchManager.CanSpawn(AgentType.Player, defenderSpawnEnergy);
+                    break;
+                case MatchSide.Attacker when agentType == AgentType.Enemy:
+                    canSpawn = _gameManager.matchManager.CanSpawn(AgentType.Enemy, attackerSpawnEnergy);
+                    break;
+                case MatchSide.Defender when agentType == AgentType.Enemy:
+                    canSpawn = _gameManager.matchManager.CanSpawn(AgentType.Enemy, defenderSpawnEnergy);
                     break;
             }
             
-            if (!_canSpawn) return;
-
-            // Spawn from object pool
-            modifiedAgent.transform.position = _spawnPoint;
-            modifiedAgent.transform.Rotate(_agentRotation);
-            modifiedAgent.SetActive(true);
+            if (!canSpawn) return;
+            
+            
+            // Spawn it
+            selectedAgent.transform.position = _spawnPoint;
+            selectedAgent.transform.Rotate(faceDirection);
+            selectedAgent.SetActive(true);
         }
 
-        public void SwitchAgentStatus(AgentController agent)
+        private GameObject ModifyAgent(AgentType type, MatchSide side, Color flagColor)
         {
-            activeAgents.Add(agent);
-        }
+            GameObject selectedAgent = GetPooledObject();
+            bool isAgent = selectedAgent.TryGetComponent(out AgentController agentController);
+            if (!isAgent) return null;
+            
+            agentController.SetBallPosition(_gameManager.matchManager.GetBallPosition());
+            agentController.agentType = type;
+            agentController.flagColor = flagColor;
+            agentController.side = side;
+            return selectedAgent;
 
-        public AgentController ClosestDistance(AgentController agentPivot)
-        {
-            float closestDistance = Mathf.Infinity;
-            AgentController closest = null;
-            foreach (AgentController agent in activeAgents)
-            {
-                float distance = Vector3.Distance(agentPivot.transform.position, agent.transform.position);
-                if (distance > closestDistance) continue;
-                
-                closestDistance = distance;
-                closest = agent;
-            }
-
-            return closest;
         }
     }
 }
