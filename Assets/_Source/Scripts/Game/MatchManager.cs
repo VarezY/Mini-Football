@@ -45,9 +45,6 @@ namespace MiniFootball.Game
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private EnergySystem enemyEnergySystem;
 
-        private Coroutine _rechargePlayerCoroutine = null;
-        private Coroutine _rechargeEnemyCoroutine = null;
-        
         private void OnEnable()
         {
             StartCoroutine(this.WaitAndSubscribe(() =>
@@ -56,6 +53,7 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnNextMatch += NextMatch;
                 InGameManager.instance.InGameEvents.OnScoredGoal += UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch += OnCatch;
+                InGameManager.instance.InGameEvents.OnEndGame += DisableCollider;
             }));
         }
 
@@ -67,6 +65,7 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnNextMatch -= NextMatch;
                 InGameManager.instance.InGameEvents.OnScoredGoal -= UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch -= OnCatch;
+                InGameManager.instance.InGameEvents.OnEndGame -= DisableCollider;
             });
         }
 
@@ -120,26 +119,6 @@ namespace MiniFootball.Game
                     enemyEnergySystem.DecreaseEnergy(amount);
                     break;
             }
-        }
-
-        [ContextMenu("Add Energy To Player")]
-        private void AddEnergy()
-        {
-            IncreaseEnergy(AgentType.Player, .4f);
-        }
-        
-        
-        [ContextMenu("Remove Energy To Player")]
-        private void RemoveEnergy()
-        {
-            DecreaseEnergy(AgentType.Player, .3f);
-        }
-        
-        [ContextMenu("AAAAAAA")]
-        private void StartMatchManually()
-        {
-            playerEnergySystem.StartRecharging();
-            enemyEnergySystem.StartRecharging();
         }
         
         public Vector3 GetBallPosition()
@@ -223,6 +202,12 @@ namespace MiniFootball.Game
             playerEnergySystem.RestartRecharge();
             enemyEnergySystem.RestartRecharge();
             StartMatch();
+        }
+
+        private void DisableCollider()
+        {
+            spawnPlayerArea.gameObject.SetActive(false);
+            spawnEnemyArea.gameObject.SetActive(false);
         }
         
         private void SpawnBall(BoxCollider spawnArea)

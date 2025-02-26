@@ -4,6 +4,7 @@ using MiniFootball.Agent;
 using MiniFootball.UI.Timer;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace MiniFootball.UI
@@ -15,14 +16,20 @@ namespace MiniFootball.UI
         [Header("Game UI")]
         [SerializeField] private TMP_Text scoreText;
         [SerializeField] private Text winnerText;
-        [SerializeField] private GameObject playAgainButotn, exitButton;
-        
+        [SerializeField] private GameObject playAgainButton;
+        [SerializeField] private GameObject exitButton;
+        [SerializeField] private RectTransform timerPanel;
+        [SerializeField] private RectTransform scorePanel;
+
         [Header("Player UI")]
+        [SerializeField] private RectTransform playerPanel;
         [SerializeField] private TMP_Text playerName;
         
         [Header("Enemy UI")]
+        [SerializeField] private RectTransform enemyPanel;
         [SerializeField] private TMP_Text enemyName;
 
+        private Sequence _uiSequence;
         private int _playerScore;
         private int _enemyScore;
         
@@ -47,12 +54,21 @@ namespace MiniFootball.UI
                 InGameManager.instance.InGameEvents.OnEndGame -= ShowWinner;
             });
         }
-        
+
+        private void Start()
+        {
+            _uiSequence = DOTween.Sequence();
+            
+            //local position in Debug Inspector
+            playerPanel.DOLocalMoveX(465f, 2f).SetDelay(4.5f); 
+            enemyPanel.DOLocalMoveX(-465f, 2f).SetDelay(4.5f); 
+            timerPanel.DOLocalMoveY(860, 2f).SetDelay(4.5f);
+            scorePanel.DOLocalMoveY(799.8f, 2f).SetDelay(4.5f);
+        }
+
         private void StartMatch()
         {
             timerController.StartTimer();
-            // playerBarController.StartRecharge();
-            // enemyBarController.StartRecharge();
         }
 
         private void UpdatePlayerScore(AgentType type)
@@ -104,7 +120,7 @@ namespace MiniFootball.UI
                 .SetEase(Ease.OutBack)
                 .OnComplete(() =>
                 {
-                    playAgainButotn.SetActive(true);
+                    playAgainButton.SetActive(true);
                     exitButton.SetActive(true);
                 });
         }

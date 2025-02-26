@@ -3,6 +3,7 @@ using MiniFootball.Agent;
 using MiniFootball.Game;
 using MiniFootball.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MiniFootball
 {
@@ -32,7 +33,6 @@ namespace MiniFootball
             agentManager = GetComponentInChildren<AgentManager>();
         }
 
-        [ContextMenu("Start Game")]
         public void StartGame()
         {
             InGameEvents.StartGame();
@@ -49,6 +49,16 @@ namespace MiniFootball
             {
                 InGameEvents.NextMatch();
             }
+        }
+
+        public void RestartGame()
+        {
+            SceneManager.LoadScene("_Source/Scene/Game");
+        }
+
+        public void GoToMainMenu()
+        {
+            SceneManager.LoadScene("_Source/Scene/Main Menu");
         }
     }
 }

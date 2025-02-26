@@ -7,7 +7,7 @@ namespace MiniFootball
     {
         public void ChangeSceneToGame()
         {
-            SceneManager.LoadScene("_Source/Scene/Prototype/Basic Gameplay with Cinemachine Opening");
+            SceneManager.LoadScene("_Source/Scene/Game");
         }
     }
 }
