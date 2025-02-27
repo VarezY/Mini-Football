@@ -8,6 +8,9 @@ namespace MiniFootball.Agent
 {
     public class AgentManager : MonoBehaviour
     {
+        public Camera MainCamera;
+        public Camera ARCamera;
+        
         [Header("Object Pool")]
         public List<GameObject> pooledObjects;
         public GameObject objectToPool;
@@ -35,7 +38,7 @@ namespace MiniFootball.Agent
 
         private void Awake()
         {
-            _camera = Camera.main;
+            _camera = MainCamera;
             activeAgents = new List<AgentController>(35);
             inactiveAgents = new List<AgentController>(35);
             
@@ -54,7 +57,20 @@ namespace MiniFootball.Agent
             StartCoroutine(this.WaitAndSubscribe(() =>
             {
                 InGameManager.instance.InGameEvents.OnNextMatch += ResetPooledObjects;
+                InGameManager.instance.InGameEvents.OnSwitchAR += InGameEventsOnOnSwitchAR;
             }));
+        }
+
+        private void InGameEventsOnOnSwitchAR(bool inAR)
+        {
+            if (inAR)
+            {
+                _camera = ARCamera;
+            }
+            else
+            {
+                _camera = MainCamera;
+            }
         }
 
         private void OnDisable()
@@ -127,12 +143,16 @@ namespace MiniFootball.Agent
         private void SpawnAgentOnField()
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            RaycastHit hit = new RaycastHit();
             if (Physics.Raycast(ray, out hit, 100, LayerMask.GetMask("Ground")))
             {
                 _spawnPoint = hit.point;
+                // _spawnPoint.y = 0f;
             }
-            _spawnPoint.y = 0f;
+            else
+            {
+                return;
+            }
             
             if (!hit.transform.TryGetComponent(out BoxCollider spawnArea)) return;
             

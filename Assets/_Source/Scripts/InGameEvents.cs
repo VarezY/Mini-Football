@@ -52,5 +52,16 @@ namespace MiniFootball
         }
 
         #endregion
+
+        #region AR Events
+
+        public event Action<bool> OnSwitchAR;
+
+        public void SwitchAR(bool isSwitched)
+        {
+            OnSwitchAR?.Invoke(isSwitched);
+        }
+
+        #endregion
     }
 }

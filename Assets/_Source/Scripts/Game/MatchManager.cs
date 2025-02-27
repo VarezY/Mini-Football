@@ -9,19 +9,11 @@ namespace MiniFootball.Game
 {
     public class MatchManager : MonoBehaviour
     {
-        public enum GameState
-        {
-            Starting,
-            Playing,
-            Scoring
-        }
-
         [Header("Debug Info (Read Only)")]
         public int currentMatch = 1;
         public int playerScore = 0;
         public int enemyScore = 0;
 
-        [SerializeField] private GameState currentState = GameState.Starting;
         public MatchSide playerStatus = MatchSide.Attacker;
         public MatchSide enemyStatus = MatchSide.Defender;
         public bool isBallOnPlayer;
@@ -31,7 +23,6 @@ namespace MiniFootball.Game
         public Transform stadiumGround;
         public int maxMatches = 6;
         public int timer = 140;
-        public int timeToFillEnergy = 2;
 
         [Header("Player Configuration")]
         [SerializeField] private BoxCollider spawnPlayerArea;
@@ -54,7 +45,16 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnScoredGoal += UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch += OnCatch;
                 InGameManager.instance.InGameEvents.OnEndGame += DisableCollider;
+                InGameManager.instance.InGameEvents.OnSwitchAR += InGameEventsOnOnSwitchAR;
             }));
+        }
+
+        private void InGameEventsOnOnSwitchAR(bool inAR)
+        {
+            if (!inAR)
+            {
+                
+            }
         }
 
         private void OnDisable()
@@ -66,6 +66,7 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnScoredGoal -= UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch -= OnCatch;
                 InGameManager.instance.InGameEvents.OnEndGame -= DisableCollider;
+                InGameManager.instance.InGameEvents.OnSwitchAR -= InGameEventsOnOnSwitchAR;
             });
         }
 
@@ -123,7 +124,7 @@ namespace MiniFootball.Game
         
         public Vector3 GetBallPosition()
         {
-            return ball.transform.position;
+            return ball.transform.localPosition;
         }
 
         public GameObject GetBall()
@@ -136,9 +137,9 @@ namespace MiniFootball.Game
             switch (side)
             {
                 case MatchSide.Attacker when playerStatus == MatchSide.Attacker:
-                    return fenceEnemy.transform.position;
+                    return fenceEnemy.transform.localPosition;
                 case MatchSide.Attacker when enemyStatus == MatchSide.Attacker:
-                    return fencePlayer.transform.position;
+                    return fencePlayer.transform.localPosition;
                 default:
                     return Vector3.zero;
             }
@@ -214,9 +215,9 @@ namespace MiniFootball.Game
         {
             Vector3 spawnPosition = spawnArea.GetRandomPointInsideCollider();
             spawnPosition.y = 0.2f;
-            ball.transform.position = spawnPosition;
+            ball.transform.localPosition = spawnPosition;
             ball.GetComponent<SphereCollider>().enabled = true;
-            ball.transform.SetParent(null);
+            ball.transform.SetParent(stadiumGround);
             ball.SetActive(true);
         }
 

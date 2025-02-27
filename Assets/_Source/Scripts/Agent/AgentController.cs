@@ -39,7 +39,7 @@ namespace MiniFootball.Agent
         public InGameManager gameManager => _gameManager;
         public CharacterController controller => _characterController;
         public Vector3 ballPosition => _ballPosition;
-        public Vector3 target => _target.transform.position;
+        public Vector3 target => _target.transform.localPosition;
         public Vector3 patrolPosition => _spawnPosition;
         public bool hasBall => _hasBall;
 
@@ -70,7 +70,7 @@ namespace MiniFootball.Agent
 
         private void OnEnable()
         {
-            _spawnPosition = transform.position;
+            _spawnPosition = transform.localPosition;
             StartCoroutine(InitializeAgent());
             StartCoroutine(this.WaitAndSubscribe(() =>
             {

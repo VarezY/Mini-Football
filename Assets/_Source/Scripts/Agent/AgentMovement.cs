@@ -15,10 +15,29 @@ namespace MiniFootball.Agent
         public Vector3 direction;
         public Vector3 velocity;
         private CharacterController _controller;
+        private float _speedScaleAR;
 
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
+            _speedScaleAR = 1;
+        }
+
+        private void Start()
+        {
+            InGameManager.instance.InGameEvents.OnSwitchAR += InGameEventsOnOnSwitchAR;
+        }
+
+        private void InGameEventsOnOnSwitchAR(bool inAR)
+        {
+            if (inAR)
+            {
+                _speedScaleAR = InGameManager.instance.arManager.aRScale;
+            }
+            else
+            {
+                _speedScaleAR = 1;
+            }
         }
 
         public void SetMoveSpeed(float speed)
@@ -28,7 +47,7 @@ namespace MiniFootball.Agent
 
         public void MoveToPosition(Vector3 targetPosition, Action onDestinationReached = null)
         {
-            direction = (targetPosition - transform.position);
+            direction = (targetPosition - transform.localPosition);
             direction.y = 0; // Lock y axis
 
             if (!(direction.magnitude > stoppingDistance))
@@ -38,7 +57,7 @@ namespace MiniFootball.Agent
             }
             
             direction = direction.normalized;
-            velocity = direction * (moveSpeed * Time.deltaTime);
+            velocity = direction * (moveSpeed * _speedScaleAR * Time.deltaTime);
             _controller.Move(velocity);
             
             if (direction != Vector3.zero)
