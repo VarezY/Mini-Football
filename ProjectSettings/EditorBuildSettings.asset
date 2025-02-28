@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Source/Scene/Prototype/AR Test.unity
     guid: 9673a89d292a3a94fae537e10bc7445a
+  - enabled: 0
+    path: Assets/_Source/Scene/Prototype/AR Test  Stadium.unity
+    guid: fe1c85dba006929468016f7eb77cb10a
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: f4ede87ae2dca03448999cd585e0dc49,
       type: 2}

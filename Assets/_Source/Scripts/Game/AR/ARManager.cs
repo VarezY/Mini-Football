@@ -17,14 +17,15 @@ namespace MiniFootball.Game.AR
         [Header("AR UI")]
         public GameObject aRButton;
         public GameObject visualizerButton;
-        
-        [Header("Game Objects")]
+
+        [Header("Game Objects")] 
+        public GameObject gameBoard;
         public UISwitcher.UISwitcher aRToggle;
         public UISwitcher.UISwitcher visualizationToggle;
 
         private InGameManager _gameManager;
-        private bool _inAR = false;
-        
+        public bool inAR { get; private set; } = false;
+
         private void OnEnable()
         {
             StartCoroutine(CheckSupport());
@@ -45,8 +46,8 @@ namespace MiniFootball.Game.AR
 
         private void ToggleVisualizer(bool isVisible)
         {
-            if (planeManager.planePrefab.TryGetComponent(out GameObject visualizer))
-                visualizer.SetActive(isVisible);
+            if (planeManager.planePrefab.TryGetComponent(out ARPlaneMeshVisualizer visualizer))
+                visualizer.enabled = isVisible;
             
             foreach (ARPlane plane in planeManager.trackables)
             {
@@ -81,7 +82,7 @@ namespace MiniFootball.Game.AR
 
         private void CheckCameraPermissions(bool toggleAR)
         {
-            _inAR = toggleAR;
+            inAR = toggleAR;
             if (toggleAR)
             {
                 StartCoroutine(CheckARCameraPermissions());
@@ -101,6 +102,7 @@ namespace MiniFootball.Game.AR
             if (!Permission.HasUserAuthorizedPermission(Permission.Camera))
             {
                 aRToggle.isOn = false;
+                inAR = false;
                 yield break;
             }
             
@@ -108,6 +110,7 @@ namespace MiniFootball.Game.AR
             session.enabled = true;
             planeManager.gameObject.SetActive(true);
             visualizerButton.SetActive(true);
+            gameBoard.SetActive(false);
             _gameManager.InGameEvents.SwitchAR(true);
         }
     

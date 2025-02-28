@@ -46,6 +46,7 @@ namespace MiniFootball.Game.AR
                 
                 gameBoard.transform.position = hitPose.position;
                 gameBoard.transform.localScale = Vector3.one * _gameManager.arManager.aRScale;
+                gameBoard.SetActive(true);
                 raycastManager.enabled = false;
                 _hasSpawned = true;
             }

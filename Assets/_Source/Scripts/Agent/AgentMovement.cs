@@ -10,34 +10,15 @@ namespace MiniFootball.Agent
         public float moveSpeedNormal = 0.75f;
         public float moveSpeedDefender = 1f;
         public float returnSpeedDefender = 2f;
-        [SerializeField] private float stoppingDistance = 0.1f;
+        public float speedScaler = 0.25f;
 
         public Vector3 direction;
         public Vector3 velocity;
         private CharacterController _controller;
-        private float _speedScaleAR;
 
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            _speedScaleAR = 1;
-        }
-
-        private void Start()
-        {
-            InGameManager.instance.InGameEvents.OnSwitchAR += InGameEventsOnOnSwitchAR;
-        }
-
-        private void InGameEventsOnOnSwitchAR(bool inAR)
-        {
-            if (inAR)
-            {
-                _speedScaleAR = InGameManager.instance.arManager.aRScale;
-            }
-            else
-            {
-                _speedScaleAR = 1;
-            }
         }
 
         public void SetMoveSpeed(float speed)
@@ -47,17 +28,25 @@ namespace MiniFootball.Agent
 
         public void MoveToPosition(Vector3 targetPosition, Action onDestinationReached = null)
         {
+            bool ar = InGameManager.instance.arManager.inAR;
             direction = (targetPosition - transform.localPosition);
             direction.y = 0; // Lock y axis
 
-            if (!(direction.magnitude > stoppingDistance))
+            if (!(direction.magnitude > 0.0025f))
             {
                 onDestinationReached?.Invoke();
                 return;
             }
             
             direction = direction.normalized;
-            velocity = direction * (moveSpeed * _speedScaleAR * Time.deltaTime);
+            if (ar)
+            {
+                velocity = direction * (moveSpeed * 0.1f * Time.deltaTime);
+            }
+            else
+            {
+                velocity = direction * (moveSpeed * Time.deltaTime);
+            }
             _controller.Move(velocity);
             
             if (direction != Vector3.zero)

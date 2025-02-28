@@ -70,6 +70,7 @@ namespace MiniFootball.Agent
 
         private void OnEnable()
         {
+            _characterController.radius = 0f;
             _spawnPosition = transform.localPosition;
             StartCoroutine(InitializeAgent());
             StartCoroutine(this.WaitAndSubscribe(() =>

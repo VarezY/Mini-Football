@@ -45,16 +45,7 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnScoredGoal += UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch += OnCatch;
                 InGameManager.instance.InGameEvents.OnEndGame += DisableCollider;
-                InGameManager.instance.InGameEvents.OnSwitchAR += InGameEventsOnOnSwitchAR;
             }));
-        }
-
-        private void InGameEventsOnOnSwitchAR(bool inAR)
-        {
-            if (!inAR)
-            {
-                
-            }
         }
 
         private void OnDisable()
@@ -66,7 +57,6 @@ namespace MiniFootball.Game
                 InGameManager.instance.InGameEvents.OnScoredGoal -= UpdatePlayerScore;
                 InGameManager.instance.InGameEvents.OnBallCatch -= OnCatch;
                 InGameManager.instance.InGameEvents.OnEndGame -= DisableCollider;
-                InGameManager.instance.InGameEvents.OnSwitchAR -= InGameEventsOnOnSwitchAR;
             });
         }
 
@@ -137,9 +127,9 @@ namespace MiniFootball.Game
             switch (side)
             {
                 case MatchSide.Attacker when playerStatus == MatchSide.Attacker:
-                    return fenceEnemy.transform.localPosition;
+                    return fenceEnemy.transform.parent.transform.localPosition;
                 case MatchSide.Attacker when enemyStatus == MatchSide.Attacker:
-                    return fencePlayer.transform.localPosition;
+                    return fencePlayer.transform.parent.transform.localPosition;
                 default:
                     return Vector3.zero;
             }

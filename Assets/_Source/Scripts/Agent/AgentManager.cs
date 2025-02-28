@@ -45,7 +45,7 @@ namespace MiniFootball.Agent
             pooledObjects = new List<GameObject>();
             for(int i = 0; i < amountToPool; i++)
             {
-                GameObject tmp = Instantiate(objectToPool, objectToPoolParent, true);
+                GameObject tmp = Instantiate(objectToPool, objectToPoolParent);
                 tmp.name = $"Agent-{i}";
                 tmp.SetActive(false);
                 pooledObjects.Add(tmp);
@@ -61,24 +61,14 @@ namespace MiniFootball.Agent
             }));
         }
 
-        private void InGameEventsOnOnSwitchAR(bool inAR)
-        {
-            if (inAR)
-            {
-                _camera = ARCamera;
-            }
-            else
-            {
-                _camera = MainCamera;
-            }
-        }
+        
 
         private void OnDisable()
         {
             this.WaitAndUnSubscribe(() =>
             {
                 InGameManager.instance.InGameEvents.OnNextMatch -= ResetPooledObjects;
-
+                InGameManager.instance.InGameEvents.OnSwitchAR -= InGameEventsOnOnSwitchAR;
             });
         }
 
@@ -221,7 +211,18 @@ namespace MiniFootball.Agent
             agentController.flagColor = flagColor;
             agentController.side = side;
             return selectedAgent;
-
+        }
+        
+        private void InGameEventsOnOnSwitchAR(bool inAR)
+        {
+            if (inAR)
+            {
+                _camera = ARCamera;
+            }
+            else
+            {
+                _camera = MainCamera;
+            }
         }
     }
 }

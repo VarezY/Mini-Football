@@ -63,5 +63,17 @@ namespace MiniFootball
         {
             SceneManager.LoadScene("_Source/Scene/Main Menu");
         }
+
+        public void PauseGame()
+        {
+            Time.timeScale = 0f;
+            AudioListener.pause = true;
+        }
+
+        public void ResumeGame()
+        {
+            Time.timeScale = 1;
+            AudioListener.pause = false;
+        }
     }
 }
