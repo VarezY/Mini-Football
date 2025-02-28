@@ -9,5 +9,10 @@ namespace MiniFootball
         {
             SceneManager.LoadScene("_Source/Scene/Game");
         }
+
+        public void GoToGithub()
+        {
+            Application.OpenURL("https://github.com/VarezY/Mini-Football");
+        }
     }
 }
