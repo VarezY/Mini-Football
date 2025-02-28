@@ -34,6 +34,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.collab-proxy": {
+      "version": "1.2.16",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ext.nunit": {
       "version": "1.0.0",
       "depth": 0,
@@ -51,7 +58,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
-      "version": "1.1.4",
+      "version": "1.2.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -101,7 +108,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.1.13",
+      "version": "1.1.16",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -135,6 +142,15 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
+    },
+    "com.unity.visualeffectgraph": {
+      "version": "7.3.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.shadergraph": "7.3.1"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.xr.arcore": {
       "version": "3.1.8",

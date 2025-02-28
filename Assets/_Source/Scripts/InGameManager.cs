@@ -54,6 +54,12 @@ namespace MiniFootball
             }
         }
 
+        public void PenaltyGame()
+        {
+            SceneManager.LoadScene("_Source/Scene/Game Maze");
+
+        }
+
         public void RestartGame()
         {
             SceneManager.LoadScene("_Source/Scene/Game");

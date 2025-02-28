@@ -32,6 +32,7 @@ namespace MiniFootball.Agent
         public GameObject arrowIndicator;
         public GameObject ballIndicator;
         public GameObject defenderIndicator;
+        public GameObject reactivateParticle;
 
         #region Exposed Variables
 
@@ -148,6 +149,7 @@ namespace MiniFootball.Agent
             _agentStateMachine.TransitionTo(_agentStateMachine.IdleState);
             
             AgentController a = _gameManager.agentManager.ClosestDistance(this);
+            reactivateParticle.SetActive(true);
             // Debug.Log(!a ? $"ASU GA ADA TMN LAGI" : $"PASS KE {a.name}");
             
             if (a)
@@ -161,6 +163,7 @@ namespace MiniFootball.Agent
                     {
                         _agentMovement.SetMoveSpeed(_agentMovement.moveSpeedNormal);
                         _agentStateMachine.TransitionTo(_agentStateMachine.RunState);
+                        reactivateParticle.SetActive(false);
                     });
             }
             else

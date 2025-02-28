@@ -25,6 +25,7 @@ namespace MiniFootball.Maze
             _generatedCells = new Cell[widthMaze, heightMaze];
             _visited = new bool[widthMaze, heightMaze];
             _position = new List<Vector3>(widthMaze * heightMaze);
+            GenerateMaze();
         }
 
         [ContextMenu("Generate Maze")]

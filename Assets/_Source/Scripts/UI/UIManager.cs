@@ -109,11 +109,15 @@ namespace MiniFootball.UI
             }
             else
             {
+                AnimateWin("GAME OVER\nDRAW", () =>
+                {
+                    InGameManager.instance.PenaltyGame();
+                });
                 Debug.Log("GAME END IN DRAW - GO TO PENALTY");
             }
         }
 
-        private void AnimateWin(string winText)
+        public void AnimateWin(string winText)
         {
             winnerText.text = winText;
             winnerText.rectTransform.DOScale(2f, 1f)
@@ -122,6 +126,17 @@ namespace MiniFootball.UI
                 {
                     playAgainButton.SetActive(true);
                     exitButton.SetActive(true);
+                });
+        }
+        
+        private void AnimateWin(string winText, Action onComplete)
+        {
+            winnerText.text = winText;
+            winnerText.rectTransform.DOScale(2f, 1f)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() =>
+                {
+                    DOVirtual.DelayedCall(2f, () => onComplete?.Invoke());
                 });
         }
     }

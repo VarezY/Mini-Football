@@ -13,9 +13,10 @@ namespace MiniFootball.Agent
 
         private void Start()
         {
+            InGameManager.instance.InGameEvents.OnSwitchAR += ScaleBallMovement;
             _ball = InGameManager.instance.matchManager.GetBall();
         }
-
+        
         private void Update()
         {
             if (!_isPassing) return;
@@ -55,5 +56,18 @@ namespace MiniFootball.Agent
             _ball.transform.localPosition = new Vector3(0, 0.2f, 0.75f);
             _isPassing = false;
         }
+        
+        private void ScaleBallMovement(bool inAR)
+        {
+            if (inAR)
+            {
+                passSpeed = passSpeed * 0.1f;
+            }
+            else
+            {
+                passSpeed = 1.5f;
+            }
+        }
+
     }
 }

@@ -7,11 +7,11 @@ namespace MiniFootball.Maze{
 public class MazeSolver : MonoBehaviour
 {
     public Maze mazeGenerator;
-    public GameObject pathPrefab; // Prefab to visualize the path (e.g., a cube or sphere)
-    public float pathHeight = 0.5f; // Height of the path markers above the ground
+    public GameObject pathPrefab; 
+    public float pathHeight = 0.5f; 
     public Color pathColor = Color.green;
     public Color visitedColor = Color.yellow;
-    public float solveSpeed = 0.1f; // Seconds between each step for visualization
+    public float solveSpeed = 0.1f; 
     
     private List<Vector2Int> _solution;
     private List<GameObject> _pathMarkers = new List<GameObject>();

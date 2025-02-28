@@ -3,6 +3,7 @@ using DG.Tweening;
 using MiniFootball.Agent;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MiniFootball.UI.Timer
@@ -11,6 +12,7 @@ namespace MiniFootball.UI.Timer
     {
         [SerializeField] private Image timerOutline;
         [SerializeField] private TMP_Text timerText;
+        [SerializeField] private UnityEvent onTimerEnd;
         
         private InGameManager _gameManager;
         private Tween _outlineTween;
@@ -31,8 +33,13 @@ namespace MiniFootball.UI.Timer
                 .SetEase(Ease.Linear)
                 .OnComplete(() =>
                 {
-                    _gameManager.NextMatch(AgentType.Null);
+                    onTimerEnd?.Invoke();
                 });
+        }
+
+        public void DrawGame()
+        {
+            _gameManager.NextMatch(AgentType.Null);
         }
 
         public void RestartTimer()

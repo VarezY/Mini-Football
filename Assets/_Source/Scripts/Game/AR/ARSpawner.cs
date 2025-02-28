@@ -84,6 +84,7 @@ namespace MiniFootball.Game.AR
             ResetAR();
             gameBoard.transform.position = Vector3.zero;
             gameBoard.transform.localScale = Vector3.one;
+            gameBoard.SetActive(true);
             this.gameObject.SetActive(false);
         }
     }
